@@ -61,6 +61,7 @@ steps:
       cd $(emailgurus-dir)
       git checkout -- .
       git pull origin master
+      $(virtual-env-path)/bin/pip install -r requirements.txt
       $(virtual-env-path)/bin/python manage.py collectstatic --noinput
       $(virtual-env-path)/bin/python manage.py migrate
       supervisorctl restart emailgurus:

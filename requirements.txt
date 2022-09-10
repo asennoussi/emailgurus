@@ -6,7 +6,7 @@ charset-normalizer==2.0.10
 click==8.0.3
 Deprecated==1.2.13
 distlib==0.3.4
-Django==4.1
+Django==4.1.1
 django-axes==5.39.0
 django-ipware==4.0.2
 django-paypal==1.1.2
