@@ -197,8 +197,8 @@ def update_contacts(associated_email):
 
     la = LinkedAccounts.objects.get(associated_email=associated_email)
 
-    Contact.objects.filter(linked_account=la).delete()
     la.owner.count_contact = Contact.objects.filter(user=la.owner).count()
+    Contact.objects.filter(linked_account=la).delete()
     credentials_dict = signer.unsign_object(la.credentials)
     credentials = google.oauth2.credentials.Credentials(
         credentials_dict["token"],
