@@ -1,0 +1,43 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block title %} Emailgurus - Filter emails from your contact list {% endblock %}
+{% block content %}
+{% if view.kwargs.status == 'success' %}
+<div class="d-flex justify-content-center">
+  <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+    <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+  </svg>
+</div>
+<div class="d-flex justify-content-center">
+  <p class="lead text-center">You're all set! </br> The magic is now happening behind the curtains..
+  </p>
+</div>
+{% else %}
+<div class="d-flex justify-content-center">
+  <p class="lead">Linking the account failed, please try again..</p>
+</div>
+<div class="d-flex justify-content-center">
+  <a class="btn btn-md btn-google text-uppercase d-inline-flex align-items-center me-3 mb-3" type="button"
+    href="{% url 'link_google' %}">
+    <svg class="icon icon-md me-2" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google-g"
+      role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+      <path fill="currentColor"
+        d="M179.7 237.6L179.7 284.2 256.7 284.2C253.6 304.2 233.4 342.9 179.7 342.9 133.4 342.9 95.6 304.4 95.6 257 95.6 209.6 133.4 171.1 179.7 171.1 206.1 171.1 223.7 182.4 233.8 192.1L270.6 156.6C247 134.4 216.4 121 179.7 121 104.7 121 44 181.8 44 257 44 332.2 104.7 393 179.7 393 258 393 310 337.8 310 260.1 310 251.2 309 244.4 307.9 237.6L179.7 237.6 179.7 237.6ZM468 236.7L429.3 236.7 429.3 198 390.7 198 390.7 236.7 352 236.7 352 275.3 390.7 275.3 390.7 314 429.3 314 429.3 275.3 468 275.3">
+      </path>
+    </svg>
+    Connect account
+  </a>
+</div>
+{% endif %}
+{% endblock %}
+{% block upgradable %}
+{%if request.user.subscription_status != 'subscribed' %}
+<div class="btn-upgrade-pro">
+  <div class="text-center pb-2"><small>Trial ends in: <strong>{{user.days_left}} days</strong></small></div>
+<li class="nav-item">
+  {{ paypal_button.render }}
+</li>
+</div>
+{% endif %}
+{% endblock %}

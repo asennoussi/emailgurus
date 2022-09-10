@@ -1,0 +1,24 @@
+{% extends "landing/landing-base.html" %}
+{% load static %}
+{% block title %} {{ flatpage.title }} {% endblock %}
+
+{% block content %}
+
+
+    <!-- Header -->
+    <header id="header" class="header">
+        <div class="header-content">
+            <div class="container">
+            <h1 class="text-center">{{ flatpage.title }}</h1>
+            </div> <!-- end of container -->
+        </div> <!-- end of header-content -->
+    </header> <!-- end of header -->
+    <!-- end of header -->
+
+   <div class="container mt-3">
+    {{ flatpage.content }}
+   </div>
+<!-- Scripts -->
+<script src="{% static 'homepage/js/jquery.min.js' %}"></script> <!-- jQuery for Bootstrap's JavaScript plugins -->
+<script src="{% static 'homepage/js/scripts.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+{% endblock %}

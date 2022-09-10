@@ -1,0 +1,18 @@
+{
+  "python.pythonPath": "/Users/sshuicchi/.virtualenvs/emailguru/bin/python",
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "**/*.html": "html",
+    "**/templates/**/*.html": "django-html",
+    "**/templates/**/*": "django-txt",
+    "**/requirements{/**,*}.{txt,in}": "pip-requirements"
+  },
+  "emmet.includeLanguages": {"django-html": "html"},
+  "beautify.language": {
+    "html": ["django-html"]
+  },
+  "[django-html]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "HookyQR.beautify"
+  }
+}

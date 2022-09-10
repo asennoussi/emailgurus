@@ -1,0 +1,4 @@
+- I need to give the user the ability to link their Gmail accounts to extract the contacts 
+    - Look for Django People library and see how to build on it to prevent a user adding the same account to a different email. 
+
+- I need then to ask the users to give access to their Gmail linked to the account. 

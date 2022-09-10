@@ -1,0 +1,65 @@
+{% extends "landing/landing-base.html" %}
+{% load static %}
+{% block title %} Emailgurus - Create a new account {% endblock %}
+{% block content %}
+<!-- Header -->
+<header id="header" class="ex-2-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Sign Up</h1>
+                <p>Get free 7 days. No Credit Card required. <br> Already signed up? Then just <a class="white"
+                        href="{% url 'login' %}">Log In</a></p>
+                <!-- Sign Up Form -->
+                <div class="form-container">
+                    <form id="signUpForms" action="" method="post" data-toggle="validator" data-focus="false">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ form.email }}
+                            <label class="label-control" for="{{ form.email.id_for_label }}">Email</label>
+                            <div class="help-block with-errors">{{ form.email.errors }}</div>
+                        </div>
+                        <div class="form-group">
+                            {{ form.password1 }}
+                            <label class="label-control" for="{{ form.password1.id_for_label }}">Password </label>
+                            <div class="help-block with-errors">{{ form.password1.errors }}</div>
+                        </div>
+                        <div class="form-group">
+                            {{ form.password2 }}
+                            <label class="label-control" for="{{ form.password2.id_for_label }}">Confirm
+                                Password</label>
+                            <div class="help-block with-errors">{{ form.password2.errors }}</div>
+                        </div>
+                        <div class="form-group checkbox">
+                            By signing up, I agree with Tivo's <a href="privacy-policy.html">Privacy Policy</a> and <a
+                                href="terms-conditions.html">Terms Conditions</a>
+                            <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="form-control-submit-button">SIGN UP</button>
+                        </div>
+                        <div class="form-message">
+                            <div id="smsgSubmit" class="h3 text-center hidden"></div>
+                        </div>
+                    </form>
+                </div> <!-- end of form container -->
+                <!-- end of sign up form -->
+
+            </div> <!-- end of col -->
+        </div> <!-- end of row -->
+    </div> <!-- end of container -->
+</header> <!-- end of ex-header -->
+<!-- end of header -->
+
+
+<!-- Scripts -->
+<script src="{% static 'homepage/js/jquery.min.js' %}"></script> <!-- jQuery for Bootstrap's JavaScript plugins -->
+<script src="{% static 'homepage/js/popper.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/bootstrap.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/jquery.easing.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/swiper.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/jquery.magnific-popup.js' %}"></script>
+<!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/validator.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/scripts.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+{% endblock %}

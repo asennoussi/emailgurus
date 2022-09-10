@@ -1,0 +1,168 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block title %} {{account.associated_email}} settings - Emailgurus {% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between w-100 flex-wrap mb-3">
+  <div class="mb-3 mb-lg-0">
+      <h1 class="h4">Account settings</h1>
+      <p class="mb-0">Settings for account {{account.associated_email}}</p>
+  </div>
+   <div class="btn-group">
+      <button class="btn btn-outline-gray-600 d-inline-flex dropdown-toggle align-items-center" data-boundary="window" data-bs-toggle="dropdown" aria-expanded="false">
+          <svg class="icon icon-xs me-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M19.175,4.856L15.138,0.82c-0.295-0.295-0.817-0.295-1.112,0L8.748,6.098c-0.307,0.307-0.307,0.805,0,1.112l1.462,1.462l-1.533,1.535L7.215,8.746c-0.307-0.307-0.805-0.307-1.112,0l-5.278,5.276c-0.307,0.307-0.307,0.805,0,1.112l4.037,4.037c0.154,0.153,0.355,0.23,0.556,0.23c0.201,0,0.403-0.077,0.556-0.23l5.28-5.276c0.148-0.148,0.23-0.347,0.23-0.556c0-0.209-0.083-0.409-0.23-0.556l-1.464-1.464l1.533-1.535l1.462,1.462c0.153,0.153,0.355,0.23,0.556,0.23c0.201,0,0.402-0.077,0.556-0.23l5.278-5.278c0.147-0.147,0.23-0.347,0.23-0.556C19.406,5.203,19.322,5.004,19.175,4.856zM9.585,13.339l-4.167,4.164l-2.925-2.925l4.166-4.164l0.906,0.905l-0.67,0.668c-0.307,0.307-0.307,0.805,0,1.112c0.154,0.153,0.356,0.23,0.556,0.23c0.203,0,0.403-0.077,0.556-0.23l0.67-0.668L9.585,13.339z M13.341,9.578l-0.906-0.906l0.663-0.662c0.307-0.307,0.307-0.805,0-1.112c-0.307-0.307-0.805-0.307-1.112,0L11.322,7.56l-0.906-0.906l4.166-4.166l2.925,2.925L13.341,9.578z" clip-rule="evenodd"></path></svg>
+          Link new account
+          </button>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="{% url 'link_google' %}">
+          <div class="google-btn">
+            <div class="google-icon-wrapper">
+              <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
+            </div>
+            <p class="btn-text"><b>Connect with google</b></p>
+          </div>
+        </a>
+      </div>
+  </div> 
+</div>
+
+<div class="card border-0 shadow mb-4">
+  <div class="card-body">
+    <form id="updateLinkedAccount" action="" method="post" data-toggle="validator" data-focus="false">
+        {% csrf_token %}
+        <div class="form-check form-switch">
+          <label class="form-check-label form-label" for="{{form.active.id_for_label}}">Active</label>
+          {{ form.active }}
+        </div>
+        <div class="form-check form-switch">
+          <label class="form-check-label" for="{{form.archive_emails.id_for_label}}">Archive Emails</label>
+          {{ form.archive_emails }}
+        </div>
+        
+        <div class="mb-3 row">
+          <label for="WhitelistInput" class="col-sm-2 col-form-label">Whitelisted Domains</label>
+          <div class="tag-container col-sm-10">
+            <input type="text" id="WhitelistInput">
+            {{form.whitelist_domains}}
+          </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12 text-center">
+                <button type="submit" class="btn btn-warning">Update</button>
+              <a href="{% url 'unlink_account' pk=account.id %}" type="button" class="btn btn-danger">Unlink account</a>
+          </div>
+        </div>
+        <div class="form-message">
+            <div id="smsgSubmit" class="h3 text-center hidden"></div>
+        </div>
+    </form>
+</div>
+</div>
+
+{% endblock %}
+
+{% block upgradable %}
+{%if request.user.subscription_status != 'subscribed' %}
+<div class="btn-upgrade-pro">
+  <div class="text-center pb-2"><small>Trial ends in: <strong>{{user.days_left}} days</strong></small></div>
+<li class="nav-item">
+  {{ paypal_button.render }}
+</li>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script type="text/javascript"> 
+  const tagContainer = document.querySelector('.tag-container');
+  const input = document.querySelector('.tag-container input');
+  const inputWhitelist = document.querySelector('#inputWhitelist');
+  
+  let tags = [];
+  
+  function createTag(label) {
+    const div = document.createElement('div');
+    div.setAttribute('class', 'tag');
+    const span = document.createElement('span');
+    span.innerHTML = label;
+    const closeIcon = document.createElement('i');
+    closeIcon.innerHTML = 'X';
+    closeIcon.setAttribute('class', 'material-icons');
+    closeIcon.setAttribute('data-item', label);
+    div.appendChild(span);
+    div.appendChild(closeIcon);
+    if (!validateTags(label)){
+      div.remove();
+      return ''
+ }
+    return div;
+  }
+  
+  function clearTags() {
+    document.querySelectorAll('.tag').forEach(tag => {
+      tag.parentElement.removeChild(tag);
+    });
+  }
+
+  function validateTags(label) {
+    var re = new RegExp(/[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+/)
+    return label.match(re);
+  }
+  
+  function addTags() {
+    clearTags();
+    tags.slice().reverse().forEach(tag => {
+      tagContainer.prepend(createTag(tag));
+    });
+  }
+
+  function listTags() {
+    inputWhitelist.value.split(',').forEach(label => {
+      newTag = createTag(label)
+      tags.push(label);
+    });
+    addTags();
+  }
+  
+  input.addEventListener('keyup', (e) => {
+      if (e.key == " " || e.code == "Space" || e.keyCode == 32 ){
+        e.target.value.split(',').forEach(tag => {
+          tags.push(tag);  
+        });
+        
+        addTags();
+        input.value = '';
+      }
+  });
+
+  input.addEventListener('keyup', (e) => {
+    if (e.code == "Backspace" || e.keyCode == 8 ){
+      tags.pop();
+      addTags(); 
+    }
+});
+
+  document.addEventListener('click', (e) => {
+    console.log(e.target.tagName);
+    if (e.target.tagName === 'I') {
+      const tagLabel = e.target.getAttribute('data-item');
+      const index = tags.indexOf(tagLabel);
+      tags = [...tags.slice(0, index), ...tags.slice(index+1)];
+      addTags();    
+    }
+  })
+
+  document.getElementById("updateLinkedAccount").addEventListener("submit", function(event){
+    event.preventDefault()
+    let tags = []
+    document.querySelectorAll('.tag').forEach(tag => {
+      tags.push(tag.firstChild.innerText);
+      inputWhitelist.value = tags
+    });
+    this.submit();
+  });
+  listTags();
+  input.focus();
+  
+  </script>
+  {% endblock %}
