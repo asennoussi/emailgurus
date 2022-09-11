@@ -86,9 +86,11 @@ Please join our community for walkthroughs, discussions, feature requests, enhan
 - ✅ Multiple accounts support 
 - ✅ Archive / Not outsider emails 
 - ✅ AutoSync of contacts & Auto-refresh of inbox listeners. 
-- ⚪️ Transactional Emails (Welcome, Receipts, reminders of trial expiry, etc..)
+- ✅ Transactional Emails (Welcome, Receipts, reminders of trial expiry, etc..)
 - ⚪️ Advanced filtering logic 
 - ⚪️ Analytics on user behavior (Airbyte or rudderstack)
 - ⚪️ Outlook support 
 
 
+## LICENSE
+This software is under GNU Affero General Public License v3.0
