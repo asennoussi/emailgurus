@@ -72,6 +72,7 @@ def handle_email(email_id, from_email, user, associated_email):
         hashed_email=encrypted_contact, linked_account=la)
 
     domain = get_email_domain(from_email)
+    today = datetime.date.today()
 
     credentials_dict = signer.unsign_object(la.credentials)
     credentials = google.oauth2.credentials.Credentials(
@@ -82,7 +83,9 @@ def handle_email(email_id, from_email, user, associated_email):
         client_secret=credentials_dict["client_secret"],
         scopes=credentials_dict["scopes"])
 
-    if user.subscription_status not in ['subscribed', 'trial'] or not la.active or domain in la.whitelist_domains:
+    if user.subscription_status not in ['subscribed', 'trial'] \
+            or not la.active or domain in la.whitelist_domains \
+            or (user.subscription_status == 'canceled' and user.expires_at.date() > today):
         return
 
     service = build('gmail', 'v1', credentials=credentials)

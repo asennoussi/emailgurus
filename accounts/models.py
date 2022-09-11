@@ -104,7 +104,7 @@ class CustomUser(AbstractUser):
                 days=settings.TRIAL_DAYS_LEGNTH) if self.created_at else False
         if beyond_trial and self.subscription_status == 'trial':
             self.subscription_status = 'free'
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
 
 class LinkedAccounts(models.Model):

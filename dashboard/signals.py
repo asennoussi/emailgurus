@@ -40,7 +40,8 @@ def ipn_receiver(sender, **kwargs):
         #         order.save()
 
         # check for subscription signup IPN
-        case ('subscr_signup' | 'subscr_payment'):
+        # case ('subscr_signup' | 'subscr_payment'):
+        case 'subscr_payment':
 
             # get user id and activate the account
 
@@ -64,7 +65,7 @@ def ipn_receiver(sender, **kwargs):
                 'user_id': user.id,
                 'processed_count': processed_count,
                 'filtered_count': filtered_count,
-                'hours_saved': int(filtered_count / 100),
+                'hours_saved': filtered_count / 100,
                 'subscription_end_date': user.expires_at.strftime("%d %b, %Y")
             }
 
@@ -85,7 +86,7 @@ def ipn_receiver(sender, **kwargs):
                 'user_id': user.id,
                 'processed_count': processed_count,
                 'filtered_count': filtered_count,
-                'hours_saved': int(filtered_count / 100),
+                'hours_saved': filtered_count / 100,
                 'subscription_end_date': user.expires_at.strftime("%d %b, %Y")}
 
             subject = 'Sorry to see you go..'
