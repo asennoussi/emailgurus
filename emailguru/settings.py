@@ -201,6 +201,8 @@ AXES_META_PRECEDENCE_ORDER = [
     'REMOTE_ADDR',
 ]
 
+GTM_CONTAINER_ID = 'GTM-XXXXXXX'
+
 try:
     from .local_settings import *
 except ImportError:
