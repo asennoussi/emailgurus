@@ -191,6 +191,7 @@ EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
 EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'noreply@emailgurus.xyz'
 
 EG_LABEL = 'EG:OUTSIDERS'
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
