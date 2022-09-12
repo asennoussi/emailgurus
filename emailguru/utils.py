@@ -72,7 +72,7 @@ def handle_email(email_id, from_email, user, associated_email):
         hashed_email=encrypted_contact, linked_account=la)
 
     domain = get_email_domain(from_email)
-    today = datetime.date.today()
+    today = datetime.today()
 
     credentials_dict = signer.unsign_object(la.credentials)
     credentials = google.oauth2.credentials.Credentials(

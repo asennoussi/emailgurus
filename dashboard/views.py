@@ -106,11 +106,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         return context
 
-    @ csrf_exempt
+    @csrf_exempt
     def payment_done(request):
         return render(request, 'dashboard/success.html')
 
-    @ csrf_exempt
+    @csrf_exempt
     def payment_canceled(request):
         return render(request, 'ecommerce_app/payment_cancelled.html')
 
@@ -308,7 +308,7 @@ class AccountSettings(LoginRequiredMixin, UpdateView):
 
 
 class EmailCatcher(View):
-    @ csrf_exempt
+    @csrf_exempt
     def catch_email(request):
         try:
             # Process request data
