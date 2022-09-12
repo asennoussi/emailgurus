@@ -102,7 +102,8 @@ class CustomUser(AbstractUser):
         beyond_trial = self.created_at.date() < today - \
             datetime.timedelta(
                 days=settings.TRIAL_DAYS_LEGNTH) if self.created_at else False
-        if beyond_trial and self.subscription_status == 'trial':
+        if (beyond_trial and self.subscription_status == 'trial')\
+                or (self.subscription_status == 'canceled' and self.expires_at.date() < today):
             self.subscription_status = 'free'
         return super().save(*args, **kwargs)
 

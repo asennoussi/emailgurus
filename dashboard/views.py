@@ -20,7 +20,7 @@ from django.views.generic import ListView, TemplateView, UpdateView, RedirectVie
 from emailguru.utils import (Contact, LinkedAccounts,
                              create_or_update_linked_account,
                              get_associated_email, get_google_flow,
-                             get_paypal_button, handle_email, stop_watcher, update_contacts,
+                             get_paypal_button, handle_email, is_user_active, stop_watcher, update_contacts,
                              watch_email)
 from googleapiclient.discovery import build
 
@@ -318,7 +318,8 @@ class EmailCatcher(View):
             email_address = email_change["emailAddress"]
             # Get credentials and update Linked account
             la = LinkedAccounts.objects.get(associated_email=email_address)
-            if la.owner.subscription_status not in ['subscribed', 'trial'] or not la.active:
+            if not is_user_active(la.owner):
+                stop_watcher(la.associated_email)
                 return HttpResponse(status=200)
             credentials_dict = signer.unsign_object(la.credentials)
 

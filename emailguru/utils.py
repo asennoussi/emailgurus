@@ -72,7 +72,6 @@ def handle_email(email_id, from_email, user, associated_email):
         hashed_email=encrypted_contact, linked_account=la)
 
     domain = get_email_domain(from_email)
-    today = datetime.today()
 
     credentials_dict = signer.unsign_object(la.credentials)
     credentials = google.oauth2.credentials.Credentials(
@@ -83,9 +82,7 @@ def handle_email(email_id, from_email, user, associated_email):
         client_secret=credentials_dict["client_secret"],
         scopes=credentials_dict["scopes"])
 
-    if user.subscription_status not in ['subscribed', 'trial'] \
-            or not la.active or domain in la.whitelist_domains \
-            or (user.subscription_status == 'canceled' and user.expires_at.date() > today):
+    if not is_user_active(user) or domain in la.whitelist_domains or not la.active:
         return
 
     service = build('gmail', 'v1', credentials=credentials)
@@ -310,6 +307,12 @@ def get_hashed_other_contacts(credentials):
 def get_email_domain(email):
     return email[email.index(
         '@') + 1:] if email[email.index('@') + 1:] != 'gmail.com' else ''
+
+
+def is_user_active(user):
+    today = datetime.today()
+    return (user.subscription_status in ['subscribed', 'trial']
+            or (user.subscription_status == 'canceled' and user.expires_at.date() > today))
 
 
 def create_or_update_linked_account(request, credentials, email):
