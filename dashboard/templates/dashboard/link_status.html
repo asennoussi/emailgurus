@@ -13,20 +13,29 @@
   <p class="lead text-center">You're all set! </br> The magic is now happening behind the curtains..
   </p>
 </div>
+<div>
+  <p class="text-center">redirecting you to the dashboard...</p>
+
+</div>
+<script>
+  dashboard_link = '{% url 'dashboard' %}'
+  setTimeout(function(){
+     window.location.href = dashboard_link;
+  }, 3000);
+</script>
 {% else %}
 <div class="d-flex justify-content-center">
-  <p class="lead">Linking the account failed, please try again..</p>
+  <p class="lead">Please try again by clicking on the button below</p>
 </div>
 <div class="d-flex justify-content-center">
-  <a class="btn btn-md btn-google text-uppercase d-inline-flex align-items-center me-3 mb-3" type="button"
+  <a class="d-inline-flex align-items-center me-3 mb-3" type="button"
     href="{% url 'link_google' %}">
-    <svg class="icon icon-md me-2" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google-g"
-      role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-      <path fill="currentColor"
-        d="M179.7 237.6L179.7 284.2 256.7 284.2C253.6 304.2 233.4 342.9 179.7 342.9 133.4 342.9 95.6 304.4 95.6 257 95.6 209.6 133.4 171.1 179.7 171.1 206.1 171.1 223.7 182.4 233.8 192.1L270.6 156.6C247 134.4 216.4 121 179.7 121 104.7 121 44 181.8 44 257 44 332.2 104.7 393 179.7 393 258 393 310 337.8 310 260.1 310 251.2 309 244.4 307.9 237.6L179.7 237.6 179.7 237.6ZM468 236.7L429.3 236.7 429.3 198 390.7 198 390.7 236.7 352 236.7 352 275.3 390.7 275.3 390.7 314 429.3 314 429.3 275.3 468 275.3">
-      </path>
-    </svg>
-    Connect account
+    <div class="google-btn">
+      <div class="google-icon-wrapper">
+        <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
+      </div>
+      <p class="btn-text"><b>Connect with google</b></p>
+    </div>
   </a>
 </div>
 {% endif %}

@@ -3,12 +3,14 @@ import base64
 import json
 import re
 from datetime import datetime, timedelta
+from urllib.parse import unquote
 
 import django_rq
 import google.oauth2.credentials
 from accounts.models import deletedAccounts
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.signing import Signer
 from django.db.models import FloatField, Q, Sum
 from django.db.models.functions import Cast
 from django.http import HttpResponse, HttpResponseRedirect
@@ -16,20 +18,18 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, TemplateView, UpdateView, RedirectView
-from emailguru.utils import (Contact, LinkedAccounts,
-                             create_or_update_linked_account,
+from django.views.generic import (ListView, RedirectView, TemplateView,
+                                  UpdateView)
+from emailguru.utils import (LinkedAccounts, create_or_update_linked_account,
                              get_associated_email, get_google_flow,
-                             get_paypal_button, handle_email, is_user_active, stop_watcher, update_contacts,
+                             get_paypal_button, get_scopes, handle_email,
+                             is_user_active, stop_watcher, update_contacts,
                              watch_email)
 from googleapiclient.discovery import build
 
 from dashboard.forms import UpdateLinkedAccountForm
 
 from .models import FilteredEmails, Jobs
-from urllib.parse import unquote
-
-from django.core.signing import Signer
 
 signer = Signer()
 
@@ -54,25 +54,25 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             '''
                 SELECT
                     laid as id, ae,calendar_day::date, COALESCE(df.count_emails,0) as count_filtered
-                FROM 
+                FROM
                     (SELECT
                         la.associated_email ae, la.id as laid, la.owner_id as owner
                     FROM
-                        accounts_linkedaccounts la	
-                    WHERE 
+                        accounts_linkedaccounts la
+                    WHERE
                         la.owner_id = %s and deleted ='false') as sq
 
                 CROSS JOIN
                     generate_series(current_date - interval '6 days', current_date , interval '1 days') as calendar_day
 
-                LEFT JOIN 
+                LEFT JOIN
                     dashboard_filteredemails as df
                 ON
-                    calendar_day  = df.date_filtered 
+                    calendar_day  = df.date_filtered
                 AND
                     sq.laid = df.linked_account_id
                 AND
-                        process_status = 'filtered'  
+                        process_status = 'filtered'
             ''', [self.request.user.id]
         )
 
@@ -229,25 +229,37 @@ class LinkedaccountsView(LoginRequiredMixin, ListView):
 
 class LinkAccounts(LoginRequiredMixin, RedirectView):
     url = reverse_lazy('link_status', kwargs={'status': 'success'})
+    ERROR_PERMISSION = 'Linking the account failed, please allow all the required accesses to make Emailgurus work'
 
     def get(self, request):
         # Get the credentials from Google
         flow = get_google_flow()
         authorization_response = request.build_absolute_uri(
             request.get_full_path())
-        flow.fetch_token(authorization_response=authorization_response)
+        try:
+            flow.fetch_token(authorization_response=authorization_response)
+        except Exception:
+            messages.info(request, self.ERROR_PERMISSION,
+                          extra_tags='alert alert-danger')
+            fail_url = reverse_lazy('link_status', kwargs={
+                'status': 'failure'})
+            return HttpResponseRedirect(fail_url)
+
+        if not set(get_scopes()).issubset(
+                set(request.GET.get('scope').split(' '))):
+            messages.info(request, self.ERROR_PERMISSION,
+                          extra_tags='alert alert-danger')
+            fail_url = reverse_lazy('link_status', kwargs={
+                'status': 'failure'})
+            return HttpResponseRedirect(fail_url)
 
         # Get the email associated with the credentials
         email_address = get_associated_email(flow)
-
-        # Clean the database for the given user.
-        Contact.objects.filter(user=request.user).delete()
 
         # Function Variables
         EMAIL_ALREADY_ASSOCIATED = f'The email "{email_address}" is already associated in the system, credentials updated.'
         success_url = reverse_lazy('link_status', kwargs={'status': 'success'})
         # Create the linked account
-
         linked_account, created, credentials_dict, created_label, error = create_or_update_linked_account(
             request, flow.credentials, email_address)
 
@@ -283,8 +295,6 @@ class LinkGoogleRedirectView(RedirectView):
     url = unquote(url)
 
     def get(self, request):
-        # import pdb
-        # pdb.set_trace()
         request.session['state'] = self.state
         return super().get(request)
 
