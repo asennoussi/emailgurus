@@ -204,11 +204,21 @@
 </div>
 {%elif request.user.subscription_status == 'canceled' %}
 <div class="btn-upgrade-pro">
-  <div class="text-center pb-2"><small>Subscription ends in: <strong>{{user.expires_at|date:"F, jS" }}</strong></small></div>
+  <div class="text-center pb-2"><small>Subscription ends in: </small>
+    <p>
+      <strong>{{user.expires_at|date:"F, jS" }}</strong>
+    </p>
+  </div>
 </div>
 {%elif request.user.subscription_status == 'subscribed' %}
 <div class="btn-upgrade-pro">
-  <div class="text-center pb-2"><small>Subscription renews: <strong>{{user.expires_at|date:"F, jS" }}</strong></small></div>
+  <div class="text-center pb-2"><small>Subscription renews: </small>
+    <p>
+      <strong>
+        {{user.expires_at|date:"F, jS" }}
+      </strong>
+      <p>
+  </div>
 </div>
 {% endif %}
 {% endblock %}
