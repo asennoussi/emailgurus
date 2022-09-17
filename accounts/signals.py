@@ -35,30 +35,33 @@ def queue_expiry_emails(created, instance, ** kwargs):
 
 def send_expiry_email(email_address, days_left):
     user = CustomUser.objects.get(email=email_address)
+    processed_count = FilteredEmails.objects.filter(
+        owner=user).aggregate(Sum('count_emails'))['count_emails__sum'] or 0
+    filtered_count = FilteredEmails.objects.filter(
+        owner=user, process_status='filtered').aggregate(Sum('count_emails'))['count_emails__sum'] or 0
+    payload = {
+        'user_id': user.id,
+        'processed_count': processed_count,
+        'filtered_count': filtered_count,
+        'hours_saved': int(filtered_count / 100)
+    }
     if user.subscription_status == 'subscribed':
         return
     match days_left:
         case 3:
-            processed_count = FilteredEmails.objects.filter(
-                owner=user).aggregate(Sum('count_emails'))['count_emails__sum'] or 0
-            filtered_count = FilteredEmails.objects.filter(
-                owner=user, process_status='filtered').aggregate(Sum('count_emails'))['count_emails__sum'] or 0
             template_name = 'email-expiry-three.html'
-            payload = {
-                'user_id': user.id,
-                'processed_count': processed_count,
-                'filtered_count': filtered_count,
-                'hours_saved': int(filtered_count / 100)
-            }
             subject = 'Your Emailgurus account is expiring soon..'
 
         case 2:
             # You can connect more than 1 account. Connect your personal
             template_name = 'email-expiry-two.html'
+            subject = 'Two days left until I come to your inbox..'
         case 1:
             template_name = 'email-expiry-one.html'
+            subject = 'I\m almost there.. reaching.. your inbox..'
         case 0:
             template_name = 'email-expiry-zero.html'
+            subject = 'Today is the day, email marketers are free to land on your inbox!'
 
     message = render_to_string(
         'emails/' + template_name,
