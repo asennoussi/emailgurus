@@ -127,12 +127,34 @@
 {% endblock %}
 
 {% block upgradable %}
-{%if request.user.subscription_status != 'subscribed' %}
+{%if request.user.subscription_status in 'trial, free'  %}
 <div class="btn-upgrade-pro">
-  <div class="text-center pb-2"><small>Trial ends in: <strong>{{user.days_left}} days</strong></small></div>
+  {%if request.user.subscription_status == 'trial'  %}
+    <div class="text-center pb-2"><small>Trial ends in: <strong>{{user.days_left}} days</strong></small></div>
+  {%else %}
+  <div class="text-center pb-2"><small>Trial expired!</strong></small></div>
+  {% endif %}
 <li class="nav-item">
   {{ paypal_button.render }}
 </li>
+</div>
+{%elif request.user.subscription_status == 'canceled' %}
+<div class="btn-upgrade-pro">
+  <div class="text-center pb-2"><small>Subscription ends in: </small>
+    <p>
+      <strong>{{user.expires_at|date:"F, jS" }}</strong>
+    </p>
+  </div>
+</div>
+{%elif request.user.subscription_status == 'subscribed' %}
+<div class="btn-upgrade-pro">
+  <div class="text-center pb-2"><small>Subscription renews: </small>
+    <p>
+      <strong>
+        {{user.expires_at|date:"F, jS" }}
+      </strong>
+      <p>
+  </div>
 </div>
 {% endif %}
 {% endblock %}
