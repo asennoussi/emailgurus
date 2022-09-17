@@ -20,6 +20,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import (ListView, RedirectView, TemplateView,
                                   UpdateView)
+from django.db.models.functions import Coalesce
 from emailguru.utils import (LinkedAccounts, create_or_update_linked_account,
                              get_associated_email, get_google_flow,
                              get_paypal_button, get_scopes, handle_email,
@@ -83,7 +84,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             owner=self.request.user, process_status='filtered').aggregate(Sum('count_emails'))['count_emails__sum']
         context['total_filtered_today'] = FilteredEmails.objects.filter(
             owner=self.request.user, process_status='filtered', date_filtered=datetime.now()).aggregate(
-            Sum('count_emails'))['count_emails__sum']
+            Sum('count_emails'))['count_emails__sum'] or 0
         context['time_saved'] = int(context['total_filtered'] or 0) / \
             360  # Total hours saved
         context['filteration_rate'] = int(context['total_filtered'] or 0) / \
@@ -211,7 +212,7 @@ class LinkedaccountsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         total_filtered = Sum('filteredemails__count_emails', filter=Q(
             filteredemails__process_status='filtered'))
-        total_processed = Sum('filteredemails__count_emails')
+        total_processed = Coalesce(Sum('filteredemails__count_emails'), 0)
         return (
             LinkedAccounts.objects.filter(
                 owner=self.request.user, deleted=False)
