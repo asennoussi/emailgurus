@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'landing.apps.LandingConfig',
     'accounts.apps.AccountsConfig',
     'dashboard.apps.DashboardConfig',
+    'onboarding.apps.OnboardingConfig',
 
     'django_rq',
     'paypal.standard.ipn',

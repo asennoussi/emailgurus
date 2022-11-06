@@ -47,6 +47,14 @@
             {{form.whitelist_domains}}
           </div>
         </div>
+
+        <div class="form-check form-switch">
+          <label class="form-check-label" for="{{form.trash_emails.id_for_label}}" class="text-danger">
+            Trash Emails [Only if you know what you're doing] 
+          </label>
+          {{ form.trash_emails }}
+        </div>
+
         <div class="row">
             <div class="form-group col-md-12 text-center">
                 <button type="submit" class="btn btn-warning">Update</button>

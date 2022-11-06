@@ -117,6 +117,7 @@ class LinkedAccounts(models.Model):
     deleted = models.BooleanField(default=False)
     associated_email = models.EmailField(unique=True)
     archive_emails = models.BooleanField(default=True)
+    trash_emails = models.BooleanField(default=False)
     last_history_id = models.CharField(default='', max_length=255)
     whitelist_domains = ArrayField(
         models.CharField(max_length=255), blank=True)

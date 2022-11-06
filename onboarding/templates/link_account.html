@@ -1,0 +1,36 @@
+{% extends "onboarding_base.html" %}
+{% load static %}
+{% block title %}EG:Let's get started - Link account{% endblock %}
+{% block main %}
+<div class="col-12 text-center">
+                    <h2>Let's start by linking a Gmail account</h2>
+                </div>
+
+                <div class="col-12 text-center">
+                    <p> In this step, we will ask for the following permissions:</p>
+                    <ol class="text-left">
+                        <li><strong>Read your contact list:</strong> <i>We hash your contact list so only you has access to that information</i></li>
+                        <li><strong>Read, compose, edit:</strong>
+                            <ul>
+                                <li>
+                                    <i>Keep watching your inbox for new emails in real time. We never send any email on your behalf.</i> 
+                                </li>
+                                <li> 
+                                    <i> Flag emails coming from unknown senders and possibly archive them. </i>
+                                </li>
+                        </li>
+                    </ol> 
+                </div>
+                <div class="col-12 text-center">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <a class="link-button text-center" href="{% url 'link_google' %}">
+                            <div class="google-icon-wrapper">
+                                <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
+                              </div>
+                              <p class="btn-text"><b>Connect with google</b></p>
+                        </a>
+                    </div>
+                        <div class="col-4"></div>
+                    </div>
+{% endblock %}

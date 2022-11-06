@@ -22,6 +22,7 @@ from dashboard.views import EmailCatcher
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
+    path('onboarding/', include('onboarding.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),

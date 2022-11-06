@@ -1,0 +1,23 @@
+{% extends "onboarding_base.html" %}
+{% load static %}
+{% block title %}EG:Let's get started - Link account{% endblock %}
+{% block main %}
+<div class="col-12 text-center">
+                    <h2>Add a few domains to the allow-list </h2>
+                </div>
+
+                <div class="col-12">
+                    <p> Senders from this list will not be flagged</p>
+                <div class="col-12 text-center">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <a class="link-button text-center" href="{% url 'onboarding' step_name='allowlist-domains' %}">
+                            <div class="google-icon-wrapper">
+                                ➡️
+                              </div>
+                              <p class="btn-text"><b>Customize Settings</b></p>
+                        </a>
+                    </div>
+                        <div class="col-4"></div>
+                    </div>
+{% endblock %}

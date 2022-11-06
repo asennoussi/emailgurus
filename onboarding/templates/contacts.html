@@ -1,0 +1,41 @@
+{% extends "onboarding_base.html" %}
+{% load static %}
+{% block title %}EG:Let's get started - Link account{% endblock %}
+{% block main %}
+<div class="col-12 text-center">
+                    <h2>{{request.user.count_contact}} <i>Contacts from</i> {{account.associated_email}}  </h2>
+                </div>
+
+                <div class="col-12">
+                    <p> By default:<p> 
+                    <p> ✅ Any email coming from your contacts will appear on your inbox or follow Gmail inbox logic.</p>
+                    <p> ✚ Add people you know to your contact list so they don't get Filtered by Emailgurus.</p>
+                    <p> But you can customize the behavior..<p> 
+                </div>
+                <h2 class="text-center">What to do with unknown senders?</h2>
+                <div class="row text-center">
+                    <div class="col-6"></div>
+                    <div class="col-6"></div>
+                </div>
+                <div class="col-12">
+                    <div class="col-6">
+                        {{ form.archive_emails }}
+                    </div>
+                    <div class="col-6">
+                        
+                    </div>
+                <div>
+                <div class="col-12 text-center">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <a class="link-button text-center" href="{% url 'onboarding-update' step_name='allowlist-domains' %}">
+                            <div class="google-icon-wrapper">
+                                ➡️
+                              </div>
+                              <p class="btn-text"><b>Domains Allow-list </b></p>
+                        </a>
+                    </div>
+                        <div class="col-4"></div>
+                    </div>
+                </div>
+{% endblock %}

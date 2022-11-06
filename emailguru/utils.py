@@ -108,6 +108,12 @@ def handle_email(email_id, from_email, user, associated_email):
     if not la.archive_emails:
         update_label.pop('removeLabelIds')
 
+    if la.trash_emails:
+        update_label = {
+            "addLabelIds": ['TRASH'],
+            "removeLabelIds": ['INBOX']
+        }
+
     service.users().messages().modify(
         userId='me', id=email_id, body=update_label).execute()
     filtered_email, created = FilteredEmails.objects.get_or_create(
