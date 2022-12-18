@@ -17,15 +17,23 @@
             <img class="logo-header" src="{% static 'homepage/images/purple.svg' %}" alt='Emailgurus -- Flag unknow senders'/>
         </header>
         <div class="row ">
-            <div class="col-2"></div>
-            <div class="col-8 card">
-                <div class="col-12 step-number ">
-                    STEP <strong>{{step_number}}</strong> OF <strong>4</strong>
-                </div>
+            <div class="col-8 col-xs-12 card">
+                <div class="container-header">
+                    <div class="step-number">STEP <strong>{{step_number}}</strong> OF <strong>4</strong></div>
+                    {% if step_number > 1%}
+                    <div class="skip">
+                        <a href="{% url 'dashboard'%}">
+                            Skip
+                        </a>
+                    </div>
+                    {%endif%}
+                  </div>
+                  
+
 
                 {% block main %}{% endblock %}
             </div>
-            <div class="col-2"></div>
         </div>
+        {% block extra_js %}{% endblock %}
     </body>
     <html>

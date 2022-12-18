@@ -229,7 +229,7 @@ class LinkedaccountsView(LoginRequiredMixin, ListView):
 
 
 class LinkAccounts(LoginRequiredMixin, RedirectView):
-    url = reverse_lazy('link_status', kwargs={'status': 'success'})
+    url = reverse_lazy('onboarding-update', kwargs={'step_name': 'contacts'})
     ERROR_PERMISSION = 'Linking the account failed, please allow all the required accesses to make Emailgurus work'
 
     def get(self, request):
@@ -259,7 +259,8 @@ class LinkAccounts(LoginRequiredMixin, RedirectView):
 
         # Function Variables
         EMAIL_ALREADY_ASSOCIATED = f'The email "{email_address}" is already associated in the system, credentials updated.'
-        success_url = reverse_lazy('link_status', kwargs={'status': 'success'})
+        success_url = reverse_lazy(
+            'onboarding-update', kwargs={'step_name': 'contacts'})
         # Create the linked account
         linked_account, created, credentials_dict, created_label, error = create_or_update_linked_account(
             request, flow.credentials, email_address)
@@ -281,7 +282,7 @@ class LinkAccounts(LoginRequiredMixin, RedirectView):
         linked_account.associated_email = email_address
         linked_account.label = created_label
         linked_account.save()
-        django_rq.enqueue(update_contacts, associated_email=email_address)
+        update_contacts(associated_email=email_address)
         return super().get(request)
 
 

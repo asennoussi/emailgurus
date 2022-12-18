@@ -27,7 +27,8 @@ class LoginView(auth_views.LoginView):
 class SignUpView(CreateView):
     template_name = "accounts/sign-up.html"
     form_class = SignUpForm
-    success_url = reverse_lazy('dashboard')
+    success_url = reverse_lazy(
+        'onboarding', kwargs={'step_name': 'link-account'})
 
     def form_valid(self, form):
         to_return = super().form_valid(form)

@@ -39,16 +39,3 @@ class UpdateLinkedAccountForm(forms.ModelForm):
             'archive_emails': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'trash_emails': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
-
-
-class OnboardingUpdateLinkedAccountForm(forms.ModelForm):
-
-    class Meta:
-        CHOICES = [('0', 'Don\'t archive'),
-                   ('1', 'Archive')]
-        model = LinkedAccounts
-        fields = ['archive_emails', 'whitelist_domains']
-        widgets = {
-            'whitelist_domains': forms.HiddenInput(attrs={'id': 'inputWhitelist'}),
-            'archive_emails': forms.RadioSelect(attrs={'class': 'form-check-input'}, choices=CHOICES)
-        }

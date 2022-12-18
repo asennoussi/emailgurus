@@ -1,6 +1,6 @@
 {% extends "onboarding_base.html" %}
 {% load static %}
-{% block title %}EG:Let's get started - Link account{% endblock %}
+{% block title %}EG:Let's get started - Domains Allowlist {% endblock %}
 {% block main %}
 <div class="col-12 text-center">
                     <h2>Add a few domains to the allow-list </h2>
@@ -9,15 +9,113 @@
                 <div class="col-12">
                     <p> Senders from this list will not be flagged</p>
                 <div class="col-12 text-center">
-                    <div class="col-4"></div>
-                    <div class="col-4">
-                        <a class="link-button text-center" href="{% url 'onboarding' step_name='allowlist-domains' %}">
-                            <div class="google-icon-wrapper">
-                                ➡️
-                              </div>
-                              <p class="btn-text"><b>Customize Settings</b></p>
-                        </a>
+                    <form id="updateLinkedAccount" action="" method="post">
+                        {%csrf_token%}
+                        <div class="col-12">
+                            <label for="WhitelistInput" class="col-sm-2 col-form-label">Allow-list Domains</label>
+                            <div class="tag-container col-sm-10">
+                                <input type="text" id="WhitelistInput">
+                                {{form.whitelist_domains}}
+                            </div>
+                        </div>
                     </div>
-                        <div class="col-4"></div>
-                    </div>
+                    <div>
+                        <div class="box">
+                            <input type="submit" class="submit-button text-center" value="Done"/>
+                        </div>
+                    </form>
+                </div>
 {% endblock %}
+{% block extra_js %}
+<script type="text/javascript"> 
+  const tagContainer = document.querySelector('.tag-container');
+  const input = document.querySelector('.tag-container input');
+  const inputWhitelist = document.querySelector('#inputWhitelist');
+  
+  let tags = [];
+  
+  function createTag(label) {
+    const div = document.createElement('div');
+    div.setAttribute('class', 'tag');
+    const span = document.createElement('span');
+    span.innerHTML = label;
+    const closeIcon = document.createElement('i');
+    closeIcon.innerHTML = 'X';
+    closeIcon.setAttribute('class', 'material-icons');
+    closeIcon.setAttribute('data-item', label);
+    div.appendChild(span);
+    div.appendChild(closeIcon);
+    if (!validateTags(label)){
+      div.remove();
+      return ''
+ }
+    return div;
+  }
+  
+  function clearTags() {
+    document.querySelectorAll('.tag').forEach(tag => {
+      tag.parentElement.removeChild(tag);
+    });
+  }
+
+  function validateTags(label) {
+    var re = new RegExp(/[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+/)
+    return label.match(re);
+  }
+  
+  function addTags() {
+    clearTags();
+    tags.slice().reverse().forEach(tag => {
+      tagContainer.prepend(createTag(tag));
+    });
+  }
+
+  function listTags() {
+    inputWhitelist.value.split(',').forEach(label => {
+      newTag = createTag(label)
+      tags.push(label);
+    });
+    addTags();
+  }
+  
+  input.addEventListener('keyup', (e) => {
+      if (e.key == " " || e.code == "Space" || e.keyCode == 32 ){
+        e.target.value.split(',').forEach(tag => {
+          tags.push(tag);  
+        });
+        
+        addTags();
+        input.value = '';
+      }
+  });
+
+  input.addEventListener('keyup', (e) => {
+    if (e.code == "Backspace" || e.keyCode == 8 ){
+      tags.pop();
+      addTags(); 
+    }
+});
+
+  document.addEventListener('click', (e) => {
+    console.log(e.target.tagName);
+    if (e.target.tagName === 'I') {
+      const tagLabel = e.target.getAttribute('data-item');
+      const index = tags.indexOf(tagLabel);
+      tags = [...tags.slice(0, index), ...tags.slice(index+1)];
+      addTags();    
+    }
+  })
+
+  document.getElementById("updateLinkedAccount").addEventListener("submit", function(event){
+    event.preventDefault()
+    let tags = []
+    document.querySelectorAll('.tag').forEach(tag => {
+      tags.push(tag.firstChild.innerText);
+      inputWhitelist.value = tags
+    });
+    this.submit();
+  });
+  listTags();
+  input.focus();  
+  </script>
+  {%endblock%}

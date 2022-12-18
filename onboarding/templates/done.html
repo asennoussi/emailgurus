@@ -1,0 +1,22 @@
+{% extends "onboarding_base.html" %}
+{% load static %}
+{% block title %}EG:Let's get started - Link account{% endblock %}
+{% block main %}
+<div class="col-12 text-center">
+    <h2> Saving your settings</h2>
+    <h4> You will be redirected right after..</h4>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: 0%;"></div>
+     </div>
+</div>
+{% endblock %}
+{%block extra_js%}
+<script>
+var progressBar = document.querySelector('.progress-bar-fill');
+progressBar.style.width = '100%';
+
+setTimeout(function() {
+    window.location.href = '/dashboard';
+    }, 4000);
+</script>
+{%endblock%}
