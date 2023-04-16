@@ -30,7 +30,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1', 'localhost']
 
-CSRF_TRUSTED_ORIGINS = ['https://*.ngrok.io', 'https://*.127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok.io',
+                        'https://*.127.0.0.1', 'https://*.ngrok-free.app']
 
 # Application definition
 
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'dashboard.apps.DashboardConfig',
     'onboarding.apps.OnboardingConfig',
+    'referral.apps.ReferralConfig',
 
     'django_rq',
     'paypal.standard.ipn',

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from hashlib import sha256
 
+
 import django_rq
 from accounts.models import LinkedAccounts
 from contacts.models import Contact
@@ -15,6 +16,7 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from django.core.signing import Signer
+import re
 
 signer = Signer()
 
@@ -63,6 +65,34 @@ def get_google_flow():
     return flow
 
 
+def is_part_of_contact_thread(service, email_id, user, la):
+    try:
+        message = service.users().messages().get(
+            userId='me', id=email_id, format='full').execute()
+        thread_id = message['threadId']
+        thread = service.users().threads().get(userId='me', id=thread_id).execute()
+        email_pattern = r'([\w\.-]+@[\w\.-]+)'
+
+        for msg in thread['messages']:
+            headers = msg['payload']['headers']
+            for header in headers:
+                if header["name"].lower() == "from":
+                    from_value = header["value"]
+                    match = re.search(email_pattern, from_value)
+                    if match:
+                        from_email = match.group(1)
+                        encrypted_contact = sha256(
+                            from_email.encode('utf-8')).hexdigest()
+                        if Contact.objects.filter(hashed_email=encrypted_contact, linked_account=la).exists():
+                            return True
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return False
+
+    return False
+
+
 def handle_email(email_id, from_email, user, associated_email):
 
     encrypted_contact = sha256(from_email.encode('utf-8')).hexdigest()
@@ -86,8 +116,8 @@ def handle_email(email_id, from_email, user, associated_email):
         return
 
     service = build('gmail', 'v1', credentials=credentials)
-
-    if(qs.exists()):
+    print(is_part_of_contact_thread(service, email_id, user, la))
+    if(qs.exists() or is_part_of_contact_thread(service, email_id, user, la)):
         update_label = {
             "addLabelIds": [],
             "removeLabelIds": [la.label]

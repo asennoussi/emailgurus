@@ -30,15 +30,22 @@ class SignUpView(CreateView):
     success_url = reverse_lazy(
         'onboarding', kwargs={'step_name': 'link-account'})
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Set the default value for the form field using the value stored in the cookies
+        kwargs['initial'] = {
+            'referral_code': self.request.COOKIES.get('referral_code', '')}
+        return kwargs
+
     def form_valid(self, form):
         to_return = super().form_valid(form)
-
         user = form.save()
-        user.is_verified = False  # Turns the user status to inactive
+        user.is_verified = False  # Turns the user email verification to False
         user.save()
 
-        form.send_activation_email(self.request, user)
-
+        # form.send_activation_email(self.request, user)
+        # When the user signs up check if the referral is there.
+        form.create_referral(form.cleaned_data['referral_code'], user)
         login(self.request, self.object,
               backend='accounts.backends.EmailBackend')
         return to_return

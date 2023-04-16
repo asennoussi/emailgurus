@@ -1,3 +1,6 @@
+
+import random
+import string
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -42,6 +45,13 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
+def generate_referral_code():
+    # Generate a random string of 6 characters
+    referral_code = ''.join(random.choices(
+        string.ascii_uppercase + string.digits, k=6))
+    return referral_code
+
+
 class CustomUser(AbstractUser):
     SUBSCRIPTION_STATUS = (
         ('subscribed', 'SUBSCRIBED'),
@@ -55,6 +65,8 @@ class CustomUser(AbstractUser):
     subscription_status = models.CharField(
         max_length=20, choices=SUBSCRIPTION_STATUS, default='trial')
     created_at = models.DateTimeField(auto_now_add=True)
+    referral_code = models.CharField(
+        max_length=50, default=generate_referral_code)
     expires_at = models.DateTimeField(null=True)
     is_verified = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
