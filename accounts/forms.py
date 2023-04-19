@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from .tokens import token_generator
 
 from django import forms
@@ -44,7 +45,6 @@ class SignUpForm(UserCreationForm):
 
     def clean_referral_code(self):
         referral_code = self.cleaned_data['referral_code']
-        print(referral_code)
         if referral_code:
             # Validate the referral code and retrieve the referral object
             try:
@@ -54,14 +54,23 @@ class SignUpForm(UserCreationForm):
             return referral.referral_code
         return None
 
-    def create_referral(self, referral_code, user):
-        referrer = CustomUser.objects.get(
-            referral_code=referral_code)
+    def create_referral(self, referral_code, new_user):
+        try:
+            inviter = CustomUser.objects.get(referral_code=referral_code)
 
-        referral, created = Referral.objects.get_or_create(user=referrer)
-        import pdb
-        pdb.set_trace()
-        return referral.referred_users.add(user)
+            # Check if the new user is not the inviter
+            if inviter == new_user:
+                raise ValueError("A user cannot invite themselves.")
+
+            referral = Referral.objects.create(
+                inviter=inviter, referred_user=new_user)
+            return referral
+
+        except CustomUser.DoesNotExist:
+            raise ValueError("Invalid referral code.")
+        except IntegrityError:
+            raise ValueError(
+                "This user has already been invited by the inviter.")
 
 
 class LoginForm(AuthenticationForm):

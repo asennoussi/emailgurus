@@ -3,7 +3,14 @@ from accounts.models import CustomUser
 
 
 class Referral(models.Model):
-    user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name='referred_by')
-    referred_users = models.ManyToManyField(
-        CustomUser)
+    inviter = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name='referrals_made',  null=True)
+    referred_user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name='referred_by', null=True)
+
+    # Additional fields to track referral information
+    created_at = models.DateTimeField(auto_now_add=True)
+    successful = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('inviter', 'referred_user')

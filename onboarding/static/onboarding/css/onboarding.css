@@ -116,6 +116,9 @@ li {
     border-radius: 2px;
     box-shadow: 0 3px 4px 0 rgba(0,0,0,.25);
   }
+  .google-icon-wrapper .google-icon{
+    width:21px;
+  }
   .google-btn .google-icon-wrapper {
       position: absolute;
       margin-top: 1px;

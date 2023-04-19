@@ -29,6 +29,7 @@ from emailguru.utils import (LinkedAccounts, create_or_update_linked_account,
 from googleapiclient.discovery import build
 
 from dashboard.forms import UpdateLinkedAccountForm
+from referral.models import Referral
 
 from .models import FilteredEmails, Jobs
 
@@ -370,3 +371,12 @@ class EmailCatcher(View):
             # TODO(developer) - Handle errors from gmail API.
             print(f'An error occurred: {error}')
         return HttpResponse(status=200)
+
+
+class UserReferralsView(LoginRequiredMixin, ListView):
+    template_name = 'user_referrals.html'
+    context_object_name = 'referrals'
+
+    def get_queryset(self):
+        user = self.request.user
+        return Referral.objects.filter(inviter=user).select_related('referred_user')
