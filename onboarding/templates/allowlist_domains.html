@@ -55,6 +55,7 @@
   function clearTags() {
     document.querySelectorAll('.tag').forEach(tag => {
       tag.parentElement.removeChild(tag);
+      inputWhitelist.value="";
     });
   }
 

@@ -45,7 +45,8 @@ class SignUpView(CreateView):
 
         # form.send_activation_email(self.request, user)
         # When the user signs up check if the referral is there.
-        form.create_referral(form.cleaned_data['referral_code'], user)
+        if form.cleaned_data['referral_code']:
+            form.create_referral(form.cleaned_data['referral_code'], user)
         login(self.request, self.object,
               backend='accounts.backends.EmailBackend')
         return to_return

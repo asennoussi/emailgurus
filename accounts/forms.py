@@ -44,6 +44,7 @@ class SignUpForm(UserCreationForm):
 
     def clean_referral_code(self):
         referral_code = self.cleaned_data['referral_code']
+        print(referral_code)
         if referral_code:
             # Validate the referral code and retrieve the referral object
             try:
