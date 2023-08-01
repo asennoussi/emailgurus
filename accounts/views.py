@@ -34,14 +34,14 @@ class PasswordResetView(auth_views.PasswordResetView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'status': 'ok', 'message': "If the email address exists in our database, you'll receive password reset instructions shortly."}, status=200)
         else:
             return response
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
-        if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
         else:
             return response
