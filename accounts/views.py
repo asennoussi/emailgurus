@@ -29,7 +29,7 @@ class PasswordResetView(auth_views.PasswordResetView):
     form_class = PasswordResetForm
     template_name = 'accounts/password_reset.html'
     success_url = reverse_lazy('password_reset_done')
-    email_template_name = 'emails/email-password-reset.html'
+    html_email_template_name = 'emails/email-password-reset.html'
     subject_template_name = 'emails/password_reset_subject.html'
 
     def form_valid(self, form):
