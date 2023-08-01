@@ -32,10 +32,11 @@ class UpdateLinkedAccountForm(forms.ModelForm):
     class Meta:
         model = LinkedAccounts
         fields = ['active', 'archive_emails',
-                  'trash_emails', 'whitelist_domains']
+                  'trash_emails', 'check_spam', 'whitelist_domains']
         widgets = {
             'active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'whitelist_domains': forms.HiddenInput(attrs={'id': 'inputWhitelist'}),
             'archive_emails': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'trash_emails': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+            'trash_emails': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'check_spam': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }

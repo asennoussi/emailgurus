@@ -49,8 +49,15 @@
         </div>
 
         <div class="form-check form-switch">
+          <label class="form-check-label" for="{{form.check_spam.id_for_label}}" class="text-danger">
+            Filter from SPAM [This will label SPAM Emails as well] 
+          </label>
+          {{ form.check_spam }}
+        </div>
+
+        <div class="form-check form-switch">
           <label class="form-check-label" for="{{form.trash_emails.id_for_label}}" class="text-danger">
-            Trash Emails [Only if you know what you're doing] 
+            Delete outsider Emails [Only if you know what you're doing] 
           </label>
           {{ form.trash_emails }}
         </div>

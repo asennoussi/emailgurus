@@ -116,7 +116,6 @@ def handle_email(email_id, from_email, user, associated_email):
         return
 
     service = build('gmail', 'v1', credentials=credentials)
-    print(is_part_of_contact_thread(service, email_id, user, la))
     if(qs.exists() or is_part_of_contact_thread(service, email_id, user, la)):
         update_label = {
             "addLabelIds": [],
@@ -187,12 +186,17 @@ def watch_email(associated_email):
     if la.owner.subscription_status not in ['subscribed', 'trial'] or not la.active:
         return
     try:
-        request = {
-            'labelIds': ['SPAM'],
-            'labelFilterAction': 'exclude',
+        if(not la.check_spam):
+            request = {
+                'labelIds': ['SPAM'],
+                'labelFilterAction': 'exclude',
 
-            'topicName': settings.GOOGLE_TOPIC_NAME
-        }
+                'topicName': settings.GOOGLE_TOPIC_NAME
+            }
+        else:
+            request = {
+                'topicName': settings.GOOGLE_TOPIC_NAME
+            }
 
         # Call the Gmail API
         gmail = build('gmail', 'v1', credentials=credentials)
