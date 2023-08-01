@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from landing.views import HomeView
-from accounts.views import ActivateView, LoginView, SignUpView, LogoutView
+from accounts.views import ActivateView, LoginView, PasswordResetConfirmView, PasswordResetView, ResetConfirmView, SignUpView, LogoutView
 from dashboard.views import EmailCatcher
 
 
@@ -27,6 +27,11 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('sign-up/', SignUpView.as_view(), name='signup'),
+    path('password-reset/', PasswordResetView.as_view(), name='password_reset'),
+    path('reset/<uidb64>/<token>/', PasswordResetConfirmView.as_view(),
+         name='password_reset_confirm'),
+    path('reset/done/', ResetConfirmView.as_view(),
+         name='password_reset_complete'),
     path('activate/<uidb64>/<token>/', ActivateView.as_view(), name="activate"),
     path('contacts/', include('contacts.urls')),
     path('dashboard/', include('dashboard.urls')),

@@ -2,7 +2,7 @@ from django.db import IntegrityError
 from .tokens import token_generator
 
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, PasswordResetForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
@@ -75,3 +75,12 @@ class SignUpForm(UserCreationForm):
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label='Email')
+
+
+class PasswordResetForm(PasswordResetForm):
+    email = forms.EmailField(max_length=254, widget=forms.EmailInput(
+        attrs={'autocomplete': 'email'}))
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        return email

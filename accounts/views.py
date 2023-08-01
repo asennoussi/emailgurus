@@ -1,14 +1,15 @@
 from django.contrib.auth import views as auth_views
+
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, RedirectView
 from django.contrib.auth import login
 
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
-from django.shortcuts import render
 from django.contrib import messages
+from django.http import JsonResponse
 
-from .forms import LoginForm, SignUpForm, token_generator, CustomUser
+from .forms import LoginForm, PasswordResetForm, SignUpForm, token_generator, CustomUser
 # Create your views here.
 
 
@@ -22,6 +23,36 @@ class LoginView(auth_views.LoginView):
     form_class = LoginForm
     template_name = 'accounts/login.html'
     next_page = reverse_lazy('dashboard')
+
+
+class PasswordResetView(auth_views.PasswordResetView):
+    form_class = PasswordResetForm
+    template_name = 'accounts/password_reset.html'
+    success_url = reverse_lazy('password_reset_done')
+    email_template_name = 'emails/email-password-reset.html'
+    subject_template_name = 'emails/password_reset_subject.html'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.is_ajax():
+            return JsonResponse({'status': 'ok', 'message': "If the email address exists in our database, you'll receive password reset instructions shortly."}, status=200)
+        else:
+            return response
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        if self.request.is_ajax():
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+        else:
+            return response
+
+
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = 'accounts/password_reset_confirm.html'
+
+
+class ResetConfirmView(auth_views.PasswordResetCompleteView):
+    template_name = 'accounts/password_complete_confirm.html'
 
 
 class SignUpView(CreateView):
