@@ -2155,3 +2155,16 @@ a:hover.back-to-top {
 	/* end of extra pages */
 }
 /* end of min-width width 1200px */
+
+.feedback{
+	padding: 10px;
+    font-size: 0.9em;
+}
+.error{
+	background: lightcoral;
+	color: darkred;
+}
+.success{
+	background: lightgreen;
+	color: darkgreen;
+}

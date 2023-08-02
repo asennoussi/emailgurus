@@ -28,8 +28,7 @@ class LoginView(auth_views.LoginView):
 class PasswordResetView(auth_views.PasswordResetView):
     form_class = PasswordResetForm
     template_name = 'accounts/password_reset.html'
-    success_url = reverse_lazy('password_reset_done')
-    html_email_template_name = 'emails/email-password-reset.html'
+    email_template_name = 'emails/email-password-reset.html'
     subject_template_name = 'emails/password_reset_subject.html'
 
     def form_valid(self, form):
@@ -49,10 +48,13 @@ class PasswordResetView(auth_views.PasswordResetView):
 
 class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
     template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('login')
 
-
-class ResetConfirmView(auth_views.PasswordResetCompleteView):
-    template_name = 'accounts/password_complete_confirm.html'
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request, "Your password has been reset successfully, you can now login.")
+        return response
 
 
 class SignUpView(CreateView):
