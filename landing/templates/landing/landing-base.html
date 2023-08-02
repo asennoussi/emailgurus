@@ -51,9 +51,9 @@
     <!-- end of preloader -->
     <!-- Navigation -->
     {% if messages %}
-        <div class="messages {{ message.tags }}">
+        <div class="messages ">
             {% for message in messages %}
-            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+            <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
             {% endfor %}
         </div>
     {% endif %}
