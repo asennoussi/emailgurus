@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from datetime import timedelta
 from accounts.models import CustomUser
 from .models import Referral
+from django.utils import timezone
 
 
 @receiver(post_save, sender=CustomUser)
@@ -19,6 +20,13 @@ def process_referral(sender, instance, **kwargs):
             # If the referral is not successful yet, process it
             if not referral.successful:
                 inviter = referral.inviter
+
+                if inviter.expires_at:
+                    inviter.expires_at += timedelta(days=14)
+                else:
+                    # Handle the case where expires_at is None
+                    # You might want to set it to some default datetime value or log an error.
+                    inviter.expires_at = timezone.now() + timedelta(days=14)
 
                 # Extend the inviter's payment due date by 14 days
                 inviter.expires_at += timedelta(days=14)

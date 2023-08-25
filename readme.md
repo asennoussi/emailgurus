@@ -20,7 +20,7 @@ No matter what we write in our privacy policy or marketing copy, showing the act
 After you grant access to your Contacts list and Gmail inbox, Emailgurus pull the list of contacts and irreversibly encrypts them: SHA256, so no one knows who is on your contact list. That's private, and only you own that data.
 Then we create a label on your inbox called `EG:OUTSIDERS`, and its color is purple.  
 
-Then we kick off a listener on your inbox. The listener does only one thing: Listen to any changes happening to your inbox (excluding the SPAM box) 
+Then we kick off a listener on your inbox. The listener does only one thing: Listen to any changes happening to your inbox (excluding the SPAM box -- You have the option to include SPAM as well) 
 
 When there is an incoming email, we read the metadata: `FROM`, SHA256 it, and compare it against the saved records in the database. 
 
