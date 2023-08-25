@@ -16,4 +16,4 @@ class Referral(models.Model):
         unique_together = ('inviter', 'referred_user')
 
     def __str__(self):
-        return self.referred_user.email + " From "+self.inviter.email + " " + self.successful
+        return self.referred_user.email + " From " + self.inviter.email + " " + str(self.successful)
