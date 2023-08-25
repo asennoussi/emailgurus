@@ -14,3 +14,6 @@ class Referral(models.Model):
 
     class Meta:
         unique_together = ('inviter', 'referred_user')
+
+    def __str__(self):
+        return self.referred_user.email + " From "+self.inviter.email + " " + self.successful
