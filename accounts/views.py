@@ -76,7 +76,7 @@ class SignUpView(CreateView):
         user.is_verified = False  # Turns the user email verification to False
         user.save()
 
-        # form.send_activation_email(self.request, user)
+        form.send_activation_email(self.request, user)
         # When the user signs up check if the referral is there.
         if form.cleaned_data['referral_code']:
             form.create_referral(form.cleaned_data['referral_code'], user)

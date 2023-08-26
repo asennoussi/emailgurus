@@ -61,6 +61,8 @@ class CustomUser(AbstractUser):
     )
     username = None
     email = models.EmailField(_('email address'), unique=True)
+    paypal_email = models.EmailField(
+        _('Paypal email address'), null=True, blank=True)
     count_contact = models.IntegerField(default=0)
     subscription_status = models.CharField(
         max_length=20, choices=SUBSCRIPTION_STATUS, default='trial')

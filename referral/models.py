@@ -11,6 +11,7 @@ class Referral(models.Model):
     # Additional fields to track referral information
     created_at = models.DateTimeField(auto_now_add=True)
     successful = models.BooleanField(default=False)
+    paid = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('inviter', 'referred_user')

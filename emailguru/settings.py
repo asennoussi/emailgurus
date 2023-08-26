@@ -207,6 +207,8 @@ AXES_META_PRECEDENCE_ORDER = [
 
 GTM_CONTAINER_ID = 'GTM-XXXXXXX'
 
+REFERRAL_PAYOUT_VALUE = 2
+
 try:
     from .local_settings import *
 except ImportError:
