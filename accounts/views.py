@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, RedirectView
+from django.views.generic import CreateView, RedirectView, UpdateView
 from django.contrib.auth import login
 
 from django.utils.http import urlsafe_base64_decode
@@ -9,7 +9,8 @@ from django.utils.encoding import force_str
 from django.contrib import messages
 from django.http import JsonResponse
 
-from .forms import LoginForm, PasswordResetForm, SignUpForm, token_generator, CustomUser
+from .forms import LoginForm, PasswordResetForm, SignUpForm, token_generator, CustomUser, UserEditForm
+from django.shortcuts import redirect
 # Create your views here.
 
 
@@ -108,3 +109,27 @@ class ActivateView(RedirectView):
                 request, 'We could not verify your account. Please try again', extra_tags='alert alert-danger text-center')
 
         return super().get(request, uidb64, token)
+
+
+class CustomUserEditView(UpdateView):
+    model = CustomUser
+    form_class = UserEditForm
+    template_name_suffix = '_update_form'
+    # Replace 'success_page_name' with the appropriate URL name
+    success_url = reverse_lazy('success_page_name')
+
+    def get_object(self, queryset=None):
+        # Get the current user. Ensure that a user is logged in.
+        if self.request.user.is_authenticated:
+            return self.request.user
+        else:
+            # Handle unauthenticated user (Maybe redirect to the login page)
+            return redirect('home')
+
+    def form_valid(self, form):
+        # Check if user is not subscribed and handle the subscription logic here
+        if self.object.subscription_status not in ['subscribed']:
+            # Your subscription logic goes here. You might want to call an external API, charge the user, etc.
+            self.object.subscription_status = 'subscribed'  # For now, just setting the status
+        messages.success(self.request, "User details updated successfully!")
+        return super().form_valid(form)

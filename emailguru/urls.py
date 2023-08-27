@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from landing.views import HomeView
-from accounts.views import ActivateView, LoginView, PasswordResetConfirmView, PasswordResetView, SignUpView, LogoutView
+from accounts.views import ActivateView, LoginView, PasswordResetConfirmView, PasswordResetView, SignUpView, LogoutView, CustomUserEditView
 from dashboard.views import EmailCatcher
 
 
@@ -24,6 +24,7 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('onboarding/', include('onboarding.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('settings/', CustomUserEditView.as_view(), name='settings'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('sign-up/', SignUpView.as_view(), name='signup'),

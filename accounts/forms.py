@@ -13,6 +13,14 @@ from .models import CustomUser
 from referral.models import Referral
 
 
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['paypal_email', 'email']
+
+    # You can include additional validation methods here if needed
+
+
 class SignUpForm(UserCreationForm):
     password1 = forms.CharField(widget=forms.PasswordInput())
     password2 = forms.CharField(widget=forms.PasswordInput())

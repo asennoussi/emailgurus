@@ -122,6 +122,21 @@
             <span class="sidebar-text">Refer and earn $$</span>
           </a>
         </li>
+
+        <li class="nav-item {% if request.resolver_match.url_name == "user_referrals" %}active{% endif %} ">
+          <a href="{% url 'settings' %}" class="nav-link">
+            <span class="sidebar-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Circle representing the head of the person -->
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+                <!-- Semi-circle or U shape representing the shoulders and torso -->
+                <path d="M4 20C4 15 12 15 12 20C12 20 20 20 20 20C20 15 12 10 12 15C12 10 4 15 4 20Z" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+            
+            </span>
+            <span class="sidebar-text">Settings</span>
+          </a>
+        </li>
         <li role="separator" class="dropdown-divider mt-4 mb-3 border-gray-700"></li>
         {% block upgradable %}{% endblock %}
 
@@ -169,7 +184,7 @@
                   </svg>
                   My Profile
                 </a> {% endcomment %}
-                <a class="dropdown-item d-flex align-items-center" href="{% url 'linked_accounts' %}">
+                <a class="dropdown-item d-flex align-items-center" href="{% url 'settings' %}">
                   <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd"

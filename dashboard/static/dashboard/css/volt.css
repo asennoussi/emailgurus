@@ -30330,3 +30330,31 @@ ul.messages {
   }
   
   
+/* Reset some default browser styles for better consistency */
+input[type="text"],
+input[type="email"],
+textarea {
+    box-sizing: border-box;  /* ensures padding and border don't increase total width/height */
+    width: 100%;  /* occupy full width of the container */
+    padding: 10px 15px;  /* top/bottom, left/right padding */
+    margin-bottom: 15px;  /* spacing between each input field */
+    border: 1px solid #ccc;  /* light gray border */
+    border-radius: 4px;  /* slightly rounded corners */
+    font-size: 16px;  /* accessible font size */
+    transition: border-color 0.3s ease;  /* smooth transition for border color changes */
+}
+
+/* Style the input field when it's focused */
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+    border-color: #007BFF;  /* change border color when focused */
+    outline: none;  /* remove default focus outline */
+}
+
+/* Optional: Style for placeholders */
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+textarea::placeholder {
+    color: #aaa;  /* light gray placeholder text */
+}
