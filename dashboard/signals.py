@@ -41,7 +41,7 @@ def ipn_receiver(sender, **kwargs):
 
         # check for subscription signup IPN
         # case ('subscr_signup' | 'subscr_payment'):
-        case 'subscr_payment':
+        case 'subscr_signup':
 
             # get user id and activate the account
 
@@ -94,5 +94,8 @@ def ipn_receiver(sender, **kwargs):
             message = render_to_string(
                 'emails/' + template_name, payload
             )
-    return django_rq.enqueue(user.email_user,
-                             subject, message, html_message=message)
+    if ipn_obj.txn_type in ['subscr_cancel', 'subscr_failed', 'subscr_signup']:
+        return django_rq.enqueue(user.email_user,
+                                 subject, message, html_message=message)
+    else:
+        return 'OK'
