@@ -36,6 +36,12 @@ class SignUpForm(UserCreationForm):
         ]
     # We need the user object, so it's an additional parameter
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email').lower()
+        if CustomUser.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Email address already exists.")
+        return email
+
     def send_activation_email(self, request, user):
         current_site = get_current_site(request)
         subject = 'Activate Your Account'

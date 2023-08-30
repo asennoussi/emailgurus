@@ -72,6 +72,7 @@ class SignUpView(CreateView):
         return kwargs
 
     def form_valid(self, form):
+        form.instance.email = form.instance.email.lower()
         to_return = super().form_valid(form)
         user = form.save()
         user.is_verified = False  # Turns the user email verification to False
