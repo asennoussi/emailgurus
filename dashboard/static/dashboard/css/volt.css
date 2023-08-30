@@ -30338,7 +30338,6 @@ textarea {
     width: 100%;  /* occupy full width of the container */
     padding: 10px 15px;  /* top/bottom, left/right padding */
     margin-bottom: 15px;  /* spacing between each input field */
-    border: 1px solid #ccc;  /* light gray border */
     border-radius: 4px;  /* slightly rounded corners */
     font-size: 16px;  /* accessible font size */
     transition: border-color 0.3s ease;  /* smooth transition for border color changes */
