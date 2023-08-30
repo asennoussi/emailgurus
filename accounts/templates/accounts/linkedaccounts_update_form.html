@@ -135,6 +135,14 @@
     return div;
   }
   
+  function updateInputWhitelistValue() {
+    let currentTags = [];
+    document.querySelectorAll('.tag').forEach(tag => {
+        currentTags.push(tag.firstChild.innerText);
+    });
+    inputWhitelist.value = currentTags.join(',');
+}
+
   function clearTags() {
     document.querySelectorAll('.tag').forEach(tag => {
       tag.parentElement.removeChild(tag);
@@ -151,6 +159,7 @@
     tags.slice().reverse().forEach(tag => {
       tagContainer.prepend(createTag(tag));
     });
+    updateInputWhitelistValue();
   }
 
   function listTags() {
