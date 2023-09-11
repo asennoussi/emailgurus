@@ -12,5 +12,5 @@ class HomeView(TemplateView):
         ref = request.GET.get('ref', '')
         response = render(request, self.template_name, {
                           'referral_code': ref})
-        response.set_cookie('referral_code', ref)
+        response.set_cookie('referral_code', ref, secure=True)
         return response
