@@ -169,6 +169,7 @@
     });
     addTags();
   }
+
   
   input.addEventListener('keyup', (e) => {
       if (e.key == " " || e.code == "Space" || e.keyCode == 32 ){
@@ -181,12 +182,21 @@
       }
   });
 
+  input.addEventListener('blur', function(event) {
+    const tag = input.value.trim();
+    if(tag && validateTags(tag)) {
+      tags.push(tag);
+      addTags();
+      input.value = '';
+    }
+  });
+
   input.addEventListener('keyup', (e) => {
-    if (e.code == "Backspace" || e.keyCode == 8 ){
+    if ((e.code == "Backspace" || e.keyCode == 8) && input.value === '') {
       tags.pop();
       addTags(); 
     }
-});
+  });
 
   document.addEventListener('click', (e) => {
     console.log(e.target.tagName);
