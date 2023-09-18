@@ -347,28 +347,48 @@ class EmailCatcher(View):
             print(f'An error occurred: {error}')
 
         try:
-
             gmail = build('gmail', 'v1', credentials=credentials)
             history_object = gmail.users().history().list(userId='me', historyTypes=[
-                'messageAdded'], labelId='INBOX', startHistoryId=la.last_history_id).execute()
-            histories = history_object['history']
+                'labelRemoved', 'messageAdded'], labelId=la.label, startHistoryId=la.last_history_id).execute()
+            histories = history_object.get('history', [])
 
             la.last_history_id = history_object['historyId']
             la.save()
             for history in histories:
-                for message_added in history['messagesAdded']:
-                    message_details = gmail.users().messages().get(
-                        userId='me', id=message_added['message']['id'], format='metadata', metadataHeaders='From').execute()
-                    from_field = message_details['payload']['headers'][0]['value']
-                    try:
-                        from_email = re.search('<(.*)>', from_field).group(1)
-                    except AttributeError:
-                        from_email = from_field
-                    handle_email(message_added['message']['id'], from_email,
-                                 la.owner, email_address)
+                if 'labelsRemoved' in history and la.whitelist_on_label:
+                    for labels_removed in history.get('labelsRemoved', []):
+                        message_id = labels_removed['message']['id']
+                        message_details = gmail.users().messages().get(
+                            userId='me', id=message_id, format='metadata', metadataHeaders='From').execute()
+                        from_field = message_details['payload']['headers'][0]['value']
+                        try:
+                            from_email = re.search(
+                                '<(.*)>', from_field).group(1)
+                        except AttributeError:
+                            from_email = from_field
+
+                        domain = from_email.split('@')[1]
+                        # add domain to the allow list
+                        if domain not in la.whitelist_domains:
+                            la.whitelist_domains.append(domain)
+                            la.save()
+
+                if 'messagesAdded' in history:
+                    for message_added in history.get('messagesAdded', []):
+                        message_details = gmail.users().messages().get(
+                            userId='me', id=message_added['message']['id'], format='metadata', metadataHeaders='From').execute()
+                        from_field = message_details['payload']['headers'][0]['value']
+                        try:
+                            from_email = re.search(
+                                '<(.*)>', from_field).group(1)
+                        except AttributeError:
+                            from_email = from_field
+
+                        # Handle email addition (as per your existing code)
+                        handle_email(
+                            message_added['message']['id'], from_email, la.owner, email_address)
 
         except Exception as error:
-            # TODO(developer) - Handle errors from gmail API.
             print(f'An error occurred: {error}')
         return HttpResponse(status=200)
 

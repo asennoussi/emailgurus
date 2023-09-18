@@ -6,7 +6,7 @@
 <div class="d-flex justify-content-between w-100 flex-wrap mb-3">
   <div class="mb-3 mb-lg-0">
       <h1 class="h4">Account settings</h1>
-      <p class="mb-0">Settings for account {{account.associated_email}}</p>
+      <p class="mb-0">Settings for account <b>{{account.associated_email}}</b></p>
   </div>
    <div class="btn-group">
       <button class="btn btn-outline-gray-600 d-inline-flex dropdown-toggle align-items-center" data-boundary="window" data-bs-toggle="dropdown" aria-expanded="false">
@@ -31,28 +31,24 @@
   <div class="card-body">
     <form id="updateLinkedAccount" action="" method="post" data-toggle="validator" data-focus="false">
         {% csrf_token %}
+        <h5 class="mb-4">Account Settings</h5>
         <div class="form-check form-switch">
           <label class="form-check-label form-label" for="{{form.active.id_for_label}}">Active</label>
           {{ form.active }}
         </div>
-        <div class="form-check form-switch">
-          <label class="form-check-label" for="{{form.archive_emails.id_for_label}}">Archive Emails</label>
-          {{ form.archive_emails }}
-        </div>
         
-        <div class="mb-3 row">
-          <label for="WhitelistInput" class="col-sm-2 col-form-label">Whitelisted Domains</label>
-          <div class="tag-container col-sm-10">
-            <input type="text" id="WhitelistInput">
-            {{form.whitelist_domains}}
-          </div>
-        </div>
-
         <div class="form-check form-switch">
           <label class="form-check-label" for="{{form.check_spam.id_for_label}}" class="text-danger">
-            Filter from SPAM [This will label SPAM Emails as well] 
+            Check SPAM Folder [This will label SPAM Emails as well] 
           </label>
           {{ form.check_spam }}
+        </div>
+
+        <h5 class="mb-4 mt-4">Outsiders Management</h5>
+
+        <div class="form-check form-switch">
+          <label class="form-check-label" for="{{form.archive_emails.id_for_label}}">Archive outsider Emails </label>
+          {{ form.archive_emails }}
         </div>
 
         <div class="form-check form-switch">
@@ -61,6 +57,25 @@
           </label>
           {{ form.trash_emails }}
         </div>
+
+        <h5 class="mb-4 mt-4">Allow-list settings</h5>
+        <div class="mb-3 row">
+          <label for="WhitelistInput" class="col-sm-2 col-form-label">Whitelisted Domains</label>
+          <div class="tag-container col-sm-10">
+            <input type="text" id="WhitelistInput">
+            {{form.whitelist_domains}}
+          </div>
+        </div>
+        <div class="form-check form-switch">
+          <label class="form-check-label" for="{{form.trash_emails.id_for_label}}" class="text-danger">
+            Add to Allow-list from labels
+          </label>
+          {{ form.whitelist_on_label }}
+        </div>
+
+
+
+       
 
         <div class="row">
             <div class="form-group col-md-12 text-center">
