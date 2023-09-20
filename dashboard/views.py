@@ -349,11 +349,12 @@ class EmailCatcher(View):
         try:
             gmail = build('gmail', 'v1', credentials=credentials)
             history_object = gmail.users().history().list(userId='me', historyTypes=[
-                'labelRemoved', 'messageAdded'], labelId=la.label, startHistoryId=la.last_history_id).execute()
+                'labelRemoved', 'messageAdded'], startHistoryId=la.last_history_id).execute()
             histories = history_object.get('history', [])
 
             la.last_history_id = history_object['historyId']
             la.save()
+            print(histories)
             for history in histories:
                 if 'labelsRemoved' in history and la.whitelist_on_label:
                     for labels_removed in history.get('labelsRemoved', []):
