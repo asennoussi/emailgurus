@@ -354,25 +354,25 @@ class EmailCatcher(View):
 
             la.last_history_id = history_object['historyId']
             la.save()
-            print(histories)
             for history in histories:
                 if 'labelsRemoved' in history and la.whitelist_on_label:
                     for labels_removed in history.get('labelsRemoved', []):
-                        message_id = labels_removed['message']['id']
-                        message_details = gmail.users().messages().get(
-                            userId='me', id=message_id, format='metadata', metadataHeaders='From').execute()
-                        from_field = message_details['payload']['headers'][0]['value']
-                        try:
-                            from_email = re.search(
-                                '<(.*)>', from_field).group(1)
-                        except AttributeError:
-                            from_email = from_field
+                        if la.label in labels_removed.get('labelIds', []):
+                            message_id = labels_removed['message']['id']
+                            message_details = gmail.users().messages().get(
+                                userId='me', id=message_id, format='metadata', metadataHeaders='From').execute()
+                            from_field = message_details['payload']['headers'][0]['value']
+                            try:
+                                from_email = re.search(
+                                    '<(.*)>', from_field).group(1)
+                            except AttributeError:
+                                from_email = from_field
 
-                        domain = from_email.split('@')[1]
-                        # add domain to the allow list
-                        if domain not in la.whitelist_domains:
-                            la.whitelist_domains.append(domain)
-                            la.save()
+                            domain = from_email.split('@')[1]
+                            # add domain to the allow list
+                            if domain not in la.whitelist_domains:
+                                la.whitelist_domains.append(domain)
+                                la.save()
 
                 if 'messagesAdded' in history:
                     for message_added in history.get('messagesAdded', []):
