@@ -21,7 +21,7 @@ class PaymentButtonForm(PayPalPaymentsForm):
                                 </path>
                             </svg>
                             </span>
-                            Subscribe $6.99/mo
+                            Subscribe $12.99/mo
                         </button>
                     '''
         return format_html(form_open+self.as_p()+submit_elm+form_close)

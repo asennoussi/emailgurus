@@ -417,7 +417,7 @@ def get_paypal_button(request):
     paypal_dict = {
         "cmd": "_xclick-subscriptions",
         'business': settings.PAYPAL_RECEIVER_EMAIL,
-        "a3": 6.99,  # monthly price
+        "a3": 12.99,  # monthly price
         "p3": 1,  # duration of each unit (depends on unit)
         "t3": 'M',  # duration unit ("M for Month")
         "src": "1",  # make payments recur
