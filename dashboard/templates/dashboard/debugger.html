@@ -41,6 +41,7 @@
                     <thead>
                         <tr>
                             <th>Date Processed</th>
+                            <th>From Email (Hashed)</th>
                             <th>Linked Account</th>
                             <th>Status</th>
                             <th>Reason</th>
@@ -50,6 +51,7 @@
                         {% for debug_info in debug_info_list %}
                         <tr>
                             <td>{{ debug_info.date_processed }}</td>
+                            <td>{{ debug_info.from_email_hashed }}</td>
                             <td>{{ debug_info.linked_account.associated_email }}</td>
                             <td>{{ debug_info.get_process_status_display }}</td>
                             <td>{{ debug_info.debug_info }}</td>
