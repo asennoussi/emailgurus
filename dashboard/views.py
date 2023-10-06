@@ -440,5 +440,4 @@ class DebuggerView(ListView):
                 elif time_window == '30d':
                     queryset = queryset.filter(
                         date_processed__gte=now - timedelta(days=30))
-
-        return queryset
+        return queryset.order_by('-date_processed')
