@@ -6,7 +6,7 @@ import django_rq
 from accounts.models import LinkedAccounts
 from contacts.models import Contact
 from dashboard.forms import PaymentButtonForm
-from dashboard.models import FilteredEmails, Jobs
+from dashboard.models import EmailDebugInfo, FilteredEmails, Jobs
 from django.conf import settings
 import google.oauth2.credentials
 
@@ -111,6 +111,37 @@ def handle_email(email_id, from_email, user, associated_email):
         client_id=credentials_dict["client_id"],
         client_secret=credentials_dict["client_secret"],
         scopes=credentials_dict["scopes"])
+
+    debug_info = []
+
+    if not is_user_active(user):
+        debug_info.append("User is not active.")
+    elif domain in la.whitelist_domains:
+        debug_info.append(f"Domain {domain} is whitelisted.")
+    elif not la.active:
+        debug_info.append("Linked account is not active.")
+    else:
+        if qs.exists():
+            debug_info.append("Sender is in the contact list.")
+        elif is_part_of_contact_thread(service, email_id, user, la):
+            debug_info.append("Email is part of an existing thread.")
+        else:
+            debug_info.append("Email did not meet any criteria.")
+
+    # Now, depending on whether the email is passed or filtered, you store this debug_info
+    debug_info_str = " | ".join(debug_info)
+
+    hashed_from_email = sha256(from_email.encode('utf-8')).hexdigest()
+
+    EmailDebugInfo.objects.create(
+        date_processed=datetime.now(),
+        process_status='passed' if (qs.exists() or is_part_of_contact_thread(
+            service, email_id, user, la)) else 'filtered',
+        owner=user,
+        linked_account=la,
+        debug_info=debug_info_str,
+        from_email_hashed=hashed_from_email  # Storing the hashed email here
+    )
 
     if not is_user_active(user) or domain in la.whitelist_domains or not la.active:
         return

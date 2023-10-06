@@ -41,3 +41,20 @@ class UpdateLinkedAccountForm(forms.ModelForm):
             'check_spam': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'whitelist_on_label': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
+
+
+class EmailSearchForm(forms.Form):
+    email_search = forms.CharField(
+        label='Email search',
+        required=False,
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'style': 'margin-bottom:0;'})
+    )
+    time_window = forms.ChoiceField(
+        label='Time window',
+        choices=[('', 'Select time window'), ('7d', 'Last 7 days'),
+                 ('14d', 'Last 14 days'), ('30d', 'Last 30 days')],
+        required=False,
+        widget=forms.Select(
+            attrs={'class': 'form-select', 'onchange': 'this.form.submit()'})
+    )

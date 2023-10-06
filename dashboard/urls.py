@@ -23,4 +23,5 @@ urlpatterns = [
     path('linked-accounts/unlink/<int:pk>',
          views.UnlinkAccountRedirectView.as_view(), name="unlink_account"),
     path('referrals/', views.UserReferralsView.as_view(), name='user_referrals'),
+    path('debugger/', views.DebuggerView.as_view(), name='email_debugger'),
 ]

@@ -1,11 +1,13 @@
 # TODO: Separate the payment logic in a different views and models and signals
 import base64
+from hashlib import sha256
 import json
 import re
 from datetime import datetime, timedelta
 from urllib.parse import unquote
+from datetime import timedelta
+from django.utils import timezone
 
-import django_rq
 import google.oauth2.credentials
 from accounts.models import deletedAccounts
 from django.contrib import messages
@@ -28,10 +30,10 @@ from emailguru.utils import (LinkedAccounts, create_or_update_linked_account,
                              watch_email)
 from googleapiclient.discovery import build
 
-from dashboard.forms import UpdateLinkedAccountForm
+from dashboard.forms import UpdateLinkedAccountForm, EmailSearchForm
 from referral.models import Referral
 
-from .models import FilteredEmails, Jobs
+from .models import EmailDebugInfo, FilteredEmails, Jobs
 
 signer = Signer()
 
@@ -401,3 +403,42 @@ class UserReferralsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         return Referral.objects.filter(inviter=user).select_related('referred_user')
+
+
+class DebuggerView(ListView):
+    template_name = 'dashboard/debugger.html'
+    paginate_by = 10  # Show 10 emails per page
+    ordering = ['-date_processed']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = EmailSearchForm(self.request.GET)
+        return context
+
+    def get_queryset(self):
+        form = EmailSearchForm(self.request.GET)
+        user = self.request.user
+        queryset = EmailDebugInfo.objects.filter(owner=user)
+
+        if form.is_valid():
+            email_search = form.cleaned_data['email_search']
+            time_window = form.cleaned_data['time_window']
+
+            if email_search:
+                hashed_sender = sha256(
+                    email_search.encode('utf-8')).hexdigest()
+                queryset = queryset.filter(from_email_hashed=hashed_sender)
+
+            if time_window:
+                now = timezone.now()
+                if time_window == '7d':
+                    queryset = queryset.filter(
+                        date_processed__gte=now - timedelta(days=7))
+                elif time_window == '14d':
+                    queryset = queryset.filter(
+                        date_processed__gte=now - timedelta(days=14))
+                elif time_window == '30d':
+                    queryset = queryset.filter(
+                        date_processed__gte=now - timedelta(days=30))
+
+        return queryset

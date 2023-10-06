@@ -38,3 +38,22 @@ class Jobs(models.Model):
 
     def __str__(self):
         return self.job_type + ' on ' + self.linked_account.associated_email
+
+
+class EmailDebugInfo(models.Model):
+    PROCESS_STATUS = (
+        ('filtered', 'FILTERED'),
+        ('passed', 'PASSED'),
+    )
+
+    linked_account = models.ForeignKey(
+        LinkedAccounts, on_delete=models.CASCADE)
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    date_processed = models.DateField(auto_now_add=True)
+    process_status = models.CharField(
+        max_length=20, choices=PROCESS_STATUS)
+    debug_info = models.TextField()
+    from_email_hashed = models.CharField(max_length=64, null=True, blank=True)
+
+    def __str__(self):
+        return self.linked_account.associated_email + ' ' + self.process_status + ' ' + self.date_processed.strftime("%m/%d/%Y")
