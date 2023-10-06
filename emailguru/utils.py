@@ -112,6 +112,8 @@ def handle_email(email_id, from_email, user, associated_email):
         client_secret=credentials_dict["client_secret"],
         scopes=credentials_dict["scopes"])
 
+    service = build('gmail', 'v1', credentials=credentials)
+
     debug_info = []
 
     if not is_user_active(user):
@@ -131,8 +133,6 @@ def handle_email(email_id, from_email, user, associated_email):
     # Now, depending on whether the email is passed or filtered, you store this debug_info
     debug_info_str = " | ".join(debug_info)
 
-    hashed_from_email = sha256(from_email.encode('utf-8')).hexdigest()
-
     EmailDebugInfo.objects.create(
         date_processed=datetime.now(),
         process_status='passed' if (qs.exists() or is_part_of_contact_thread(
@@ -140,13 +140,12 @@ def handle_email(email_id, from_email, user, associated_email):
         owner=user,
         linked_account=la,
         debug_info=debug_info_str,
-        from_email_hashed=hashed_from_email  # Storing the hashed email here
+        from_email_hashed=encrypted_contact  # Storing the hashed email here
     )
 
     if not is_user_active(user) or domain in la.whitelist_domains or not la.active:
         return
 
-    service = build('gmail', 'v1', credentials=credentials)
     if(qs.exists() or is_part_of_contact_thread(service, email_id, user, la)):
         update_label = {
             "addLabelIds": [],
