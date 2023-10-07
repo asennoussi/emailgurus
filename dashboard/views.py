@@ -95,7 +95,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         base = datetime.today()
         date_list = [(base - timedelta(days=x)).strftime("%d-%m-%Y")
                      for x in range(7)]
+        date_list = [datetime.strptime(date, "%d-%m-%Y") for date in date_list]
         date_list.sort()
+        date_list = [date.strftime("%d-%m-%Y") for date in date_list]
         context['series_x'] = date_list
         context['linked_accounts'] = []
         series_y_dict = {}
