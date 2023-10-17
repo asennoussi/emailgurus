@@ -356,7 +356,7 @@ def send_email_chunk(email_chunk, user):
             msg = EmailMessage(subject, html_content, to=[email])
             msg.content_subtype = 'html'
             msg.send()
-            return "Email sent"
+        return "Email sent"
     except Exception as e:
         print(e)
 
