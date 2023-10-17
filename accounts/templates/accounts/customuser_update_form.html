@@ -17,6 +17,11 @@
     <form id="updateCustomUser" action="" method="post" data-toggle="validator" data-focus="false">
         {% csrf_token %}
         <div class="form-check mb-3">
+          <label class="form-check-label form-label" for="{{form.full_name.id_for_label}}">Full name</label>
+          {{ form.full_name }}
+        </div>
+
+        <div class="form-check mb-3">
           <label class="form-check-label form-label" for="{{form.paypal_email.id_for_label}}">Paypal Email</label>
           {{ form.paypal_email }}
         </div>

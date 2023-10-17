@@ -19,8 +19,9 @@ from django import forms
 class UserEditForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['paypal_email', 'email']
+        fields = ['full_name', 'paypal_email', 'email']
         widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control'}),
             'paypal_email': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
