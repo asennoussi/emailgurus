@@ -19,10 +19,7 @@ class InviteContactsRedirectView(RedirectView):
 
     def get(self, request):
         try:
-            linked_accounts = LinkedAccounts.objects.filter(
-                owner=request.user, active=True)
-            for la in linked_accounts:
-                send_invite_emails(la.associated_email)
+            send_invite_emails(request.user)
             # Here, pull the contacts, then create chunks of emails to be scheduled.
             messages.success(
                 request, 'Invitations sent to your contact list.')

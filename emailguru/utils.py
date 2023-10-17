@@ -3,7 +3,7 @@ from hashlib import sha256
 
 
 import django_rq
-from accounts.models import LinkedAccounts
+from accounts.models import CustomUser, LinkedAccounts
 from contacts.models import Contact
 from dashboard.forms import PaymentButtonForm
 from dashboard.models import EmailDebugInfo, FilteredEmails, Jobs
@@ -307,29 +307,34 @@ def update_contacts(associated_email):
     return
 
 
-def send_invite_emails(associaed_email):
+def send_invite_emails(user):
     queue = get_queue('default')
-    queue.enqueue(schedule_chunk_emails, associaed_email)
+    queue.enqueue(schedule_chunk_emails, user)
 
 
-def schedule_chunk_emails(associated_email, chunk_size=100):
-    la = LinkedAccounts.objects.get(associated_email=associated_email)
-    credentials_dict = signer.unsign_object(la.credentials)
-    credentials = google.oauth2.credentials.Credentials(
-        credentials_dict["token"],
-        refresh_token=credentials_dict["refresh_token"],
-        token_uri=credentials_dict["token_uri"],
-        client_id=credentials_dict["client_id"],
-        client_secret=credentials_dict["client_secret"],
-        scopes=credentials_dict["scopes"])
+def schedule_chunk_emails(user, chunk_size=100):
+    linked_accounts = LinkedAccounts.objects.filter(
+        owner=user, active=True)
+    registered_emails = set(CustomUser.objects.values_list('email', flat=True))
+    all_contacts = set()  # Initialize as an empty set
+    for la in linked_accounts:
+        credentials_dict = signer.unsign_object(la.credentials)
+        credentials = google.oauth2.credentials.Credentials(
+            credentials_dict["token"],
+            refresh_token=credentials_dict["refresh_token"],
+            token_uri=credentials_dict["token_uri"],
+            client_id=credentials_dict["client_id"],
+            client_secret=credentials_dict["client_secret"],
+            scopes=credentials_dict["scopes"])
 
-    contacts = get_contacts(credentials, False)
-    other_contacts = get_other_contacts(credentials, False)
-    all_contacts = contacts + other_contacts
+        contacts = get_contacts(credentials, False)
+        other_contacts = get_other_contacts(credentials, False)
+        # Use set's update method to add multiple elements
+        all_contacts.update(contacts + other_contacts)
+
+    all_contacts = all_contacts - registered_emails
     gmail_contacts = [
         email for email in all_contacts if email.endswith('@gmail.com')]
-
-    gmail_contacts = ['aymane.sennoussi@gmail.com', 'aymane@emailgurus.xyz']
 
     queue = get_queue('default')
 
