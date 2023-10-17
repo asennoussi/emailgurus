@@ -17,6 +17,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from django.core.signing import Signer
 import re
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 
 signer = Signer()
 
@@ -266,8 +268,6 @@ def watch_email(associated_email):
 def update_contacts(associated_email):
 
     la = LinkedAccounts.objects.get(associated_email=associated_email)
-
-    la.owner.count_contact = Contact.objects.filter(user=la.owner).count()
     Contact.objects.filter(linked_account=la).delete()
     credentials_dict = signer.unsign_object(la.credentials)
     credentials = google.oauth2.credentials.Credentials(
@@ -278,14 +278,14 @@ def update_contacts(associated_email):
         client_secret=credentials_dict["client_secret"],
         scopes=credentials_dict["scopes"])
 
-    h_c = get_hashed_contacts(credentials)
-    h_o_c = get_hashed_other_contacts(credentials)
+    h_c = get_contacts(credentials)
+    h_o_c = get_other_contacts(credentials)
     contacts = (Contact(linked_account=la, user=la.owner, hashed_email='%s' % i)
                 for i in (h_c + h_o_c))
     # Create a list of contacts, and other contacts
     Contact.objects.bulk_create(contacts)
     # Update the user contact's count
-    la.owner.count_contact = la.owner.count_contact + len(h_c + h_o_c)
+    la.owner.count_contact = Contact.objects.filter(user=la.owner).count()
     la.owner.save()
     job = Jobs.objects.filter(owner=la.owner,
                               linked_account=la, job_type='contact')
@@ -307,9 +307,62 @@ def update_contacts(associated_email):
     return
 
 
-def get_hashed_contacts(credentials):
+def send_invite_emails(associaed_email):
+    queue = get_queue('default')
+    queue.enqueue(schedule_chunk_emails, associaed_email)
+
+
+def schedule_chunk_emails(associated_email, chunk_size=100):
+    la = LinkedAccounts.objects.get(associated_email=associated_email)
+    credentials_dict = signer.unsign_object(la.credentials)
+    credentials = google.oauth2.credentials.Credentials(
+        credentials_dict["token"],
+        refresh_token=credentials_dict["refresh_token"],
+        token_uri=credentials_dict["token_uri"],
+        client_id=credentials_dict["client_id"],
+        client_secret=credentials_dict["client_secret"],
+        scopes=credentials_dict["scopes"])
+
+    contacts = get_contacts(credentials, False)
+    other_contacts = get_other_contacts(credentials, False)
+    all_contacts = contacts + other_contacts
+    gmail_contacts = [
+        email for email in all_contacts if email.endswith('@gmail.com')]
+
+    gmail_contacts = ['aymane.sennoussi@gmail.com', 'aymane@emailgurus.xyz']
+
+    queue = get_queue('default')
+
+    for i in range(0, len(gmail_contacts), chunk_size):
+        scheduled_mins = i // chunk_size  # Integer division to get full minutes
+        email_chunk = gmail_contacts[i:i + chunk_size]
+        # Schedule the function to run after scheduled_mins minutes
+        queue.enqueue_in(timedelta(minutes=scheduled_mins),
+                         send_email_chunk, email_chunk, user=la.owner)
+
+
+def send_email_chunk(email_chunk, user):
+    try:
+        for email in email_chunk:
+            subject = f'{user.full_name} is inviting you to try Emailgurus'
+
+            # # Load the template and populate it with data
+            # Replace with actual data if needed
+            context = {'name': user.full_name, 'code': user.referral_code}
+            html_content = render_to_string(
+                'emails/referral_email.html', context)
+
+            msg = EmailMessage(subject, html_content, to=[email])
+            msg.content_subtype = 'html'
+            msg.send()
+            return "Email sent"
+    except Exception as e:
+        print(e)
+
+
+def get_contacts(credentials, hashed=True):
     all_connections = []
-    hashed_emails = []
+    emails_list = []
     try:
         service = build('people', 'v1', credentials=credentials)
         has_next_page = True
@@ -333,17 +386,20 @@ def get_hashed_contacts(credentials):
             emails = person.get('emailAddresses', [])
             if emails:
                 for email in emails:
-                    hashed_email = sha256(
-                        email['value'].encode('utf-8')).hexdigest()
-                    hashed_emails.append(hashed_email)
+                    if(hashed):
+                        email = sha256(
+                            email['value'].encode('utf-8')).hexdigest()
+                    else:
+                        email = email['value']
+                    emails_list.append(email)
     except HttpError as err:
         print(err)
-    return hashed_emails
+    return emails_list
 
 
-def get_hashed_other_contacts(credentials):
+def get_other_contacts(credentials, hashed=True):
     all_connections = []
-    hashed_emails = []
+    emails_list = []
     try:
         service = build('people', 'v1', credentials=credentials)
         has_next_page = True
@@ -366,12 +422,15 @@ def get_hashed_other_contacts(credentials):
             emails = person.get('emailAddresses', [])
             if emails:
                 for email in emails:
-                    hashed_email = sha256(
-                        email['value'].encode('utf-8')).hexdigest()
-                    hashed_emails.append(hashed_email)
+                    if(hashed):
+                        email = sha256(
+                            email['value'].encode('utf-8')).hexdigest()
+                    else:
+                        email = email['value']
+                    emails_list.append(email)
     except HttpError as err:
         print(err)
-    return hashed_emails
+    return emails_list
 
 
 def get_email_domain(email):

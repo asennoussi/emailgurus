@@ -117,7 +117,7 @@ class CustomUserEditView(UpdateView):
     form_class = UserEditForm
     template_name_suffix = '_update_form'
     # Replace 'success_page_name' with the appropriate URL name
-    success_url = reverse_lazy('success_page_name')
+    success_url = reverse_lazy('settings')
 
     def get_object(self, queryset=None):
         # Get the current user. Ensure that a user is logged in.

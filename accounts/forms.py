@@ -13,10 +13,17 @@ from .models import CustomUser
 from referral.models import Referral
 
 
+from django import forms
+
+
 class UserEditForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['paypal_email', 'email']
+        widgets = {
+            'paypal_email': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
 
     # You can include additional validation methods here if needed
 

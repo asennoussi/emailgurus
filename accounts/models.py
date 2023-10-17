@@ -60,6 +60,7 @@ class CustomUser(AbstractUser):
         ('free', 'FREE'),
     )
     username = None
+    full_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(_('email address'), unique=True)
     paypal_email = models.EmailField(
         _('Paypal email address'), null=True, blank=True)
@@ -68,7 +69,7 @@ class CustomUser(AbstractUser):
         max_length=20, choices=SUBSCRIPTION_STATUS, default='trial')
     created_at = models.DateTimeField(auto_now_add=True)
     referral_code = models.CharField(
-        max_length=50, default=generate_referral_code)
+        max_length=50, default=generate_referral_code, unique=True)
     expires_at = models.DateTimeField(null=True)
     is_verified = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
@@ -111,6 +112,8 @@ class CustomUser(AbstractUser):
         # The new contacts list (see /utils/update_contacts)
         # so the user gets maximum the difference in timezone or less
         # of that.
+        while CustomUser.objects.filter(referral_code=self.referral_code).exists():
+            self.referral_code = generate_referral_code()
         import datetime
         today = datetime.date.today()
         beyond_trial = self.created_at.date() < today - \
