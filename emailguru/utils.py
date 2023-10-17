@@ -344,11 +344,12 @@ def schedule_chunk_emails(associated_email, chunk_size=100):
 def send_email_chunk(email_chunk, user):
     try:
         for email in email_chunk:
-            subject = f'{user.full_name} is inviting you to try Emailgurus'
+            sender_name = user.full_name if user.full_name else user.email
+            subject = f'{sender_name} is inviting you to try Emailgurus'
 
             # # Load the template and populate it with data
             # Replace with actual data if needed
-            context = {'name': user.full_name, 'code': user.referral_code}
+            context = {'name': sender_name, 'code': user.referral_code}
             html_content = render_to_string(
                 'emails/referral_email.html', context)
 
