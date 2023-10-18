@@ -314,7 +314,7 @@ def send_invite_emails(user):
 
 def schedule_chunk_emails(user, chunk_size=100):
     linked_accounts = LinkedAccounts.objects.filter(
-        owner=user, active=True)
+        owner=user, active=True, invites_sent=False)
     registered_emails = set(CustomUser.objects.values_list('email', flat=True))
     all_contacts = set()  # Initialize as an empty set
     for la in linked_accounts:
@@ -345,6 +345,8 @@ def schedule_chunk_emails(user, chunk_size=100):
                 # Schedule the function to run after scheduled_mins minutes
                 queue.enqueue_in(timedelta(minutes=scheduled_mins),
                                  send_email_chunk, email_chunk, user=la.owner)
+            la.invites_sent = True
+            la.save()
         except Exception as e:
             print(e)
 

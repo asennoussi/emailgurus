@@ -141,6 +141,7 @@ class LinkedAccounts(models.Model):
     last_history_id = models.CharField(default='', max_length=255)
     whitelist_domains = ArrayField(
         models.CharField(max_length=255), blank=True)
+    invites_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return self.associated_email

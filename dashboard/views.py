@@ -402,6 +402,13 @@ class UserReferralsView(LoginRequiredMixin, ListView):
     template_name = 'user_referrals.html'
     context_object_name = 'referrals'
 
+    def get_context_data(self, **kwargs):
+        """Returns the data passed to the template"""
+        context = super(UserReferralsView, self).get_context_data(**kwargs)
+        context['show_invite_button'] = LinkedAccounts.objects.filter(
+            invites_sent=False).exists()
+        return context
+
     def get_queryset(self):
         user = self.request.user
         return Referral.objects.filter(inviter=user).select_related('referred_user')
