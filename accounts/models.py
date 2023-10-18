@@ -112,8 +112,9 @@ class CustomUser(AbstractUser):
         # The new contacts list (see /utils/update_contacts)
         # so the user gets maximum the difference in timezone or less
         # of that.
-        while CustomUser.objects.filter(referral_code=self.referral_code).exists():
-            self.referral_code = generate_referral_code()
+        if not self.referral_code:
+            while CustomUser.objects.filter(referral_code=self.referral_code).exists():
+                self.referral_code = generate_referral_code()
         import datetime
         today = datetime.date.today()
         beyond_trial = self.created_at.date() < today - \

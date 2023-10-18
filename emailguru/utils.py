@@ -327,23 +327,26 @@ def schedule_chunk_emails(user, chunk_size=100):
             client_secret=credentials_dict["client_secret"],
             scopes=credentials_dict["scopes"])
 
-        contacts = get_contacts(credentials, False)
-        other_contacts = get_other_contacts(credentials, False)
-        # Use set's update method to add multiple elements
-        all_contacts.update(contacts + other_contacts)
+        try:
+            contacts = get_contacts(credentials, False)
+            other_contacts = get_other_contacts(credentials, False)
+            # Use set's update method to add multiple elements
+            all_contacts.update(contacts + other_contacts)
 
-    all_contacts = all_contacts - registered_emails
-    gmail_contacts = [
-        email for email in all_contacts if email.endswith('@gmail.com')]
+            all_contacts = all_contacts - registered_emails
+            gmail_contacts = [
+                email for email in all_contacts if email.endswith('@gmail.com')]
 
-    queue = get_queue('default')
+            queue = get_queue('default')
 
-    for i in range(0, len(gmail_contacts), chunk_size):
-        scheduled_mins = i // chunk_size  # Integer division to get full minutes
-        email_chunk = gmail_contacts[i:i + chunk_size]
-        # Schedule the function to run after scheduled_mins minutes
-        queue.enqueue_in(timedelta(minutes=scheduled_mins),
-                         send_email_chunk, email_chunk, user=la.owner)
+            for i in range(0, len(gmail_contacts), chunk_size):
+                scheduled_mins = i // chunk_size  # Integer division to get full minutes
+                email_chunk = gmail_contacts[i:i + chunk_size]
+                # Schedule the function to run after scheduled_mins minutes
+                queue.enqueue_in(timedelta(minutes=scheduled_mins),
+                                 send_email_chunk, email_chunk, user=la.owner)
+        except Exception as e:
+            print(e)
 
 
 def send_email_chunk(email_chunk, user):
