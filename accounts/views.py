@@ -131,6 +131,7 @@ class CustomUserEditView(UpdateView):
         # Check if user is not subscribed and handle the subscription logic here
         if self.object.subscription_status not in ['subscribed']:
             # Your subscription logic goes here. You might want to call an external API, charge the user, etc.
-            self.object.subscription_status = 'subscribed'  # For now, just setting the status
+            # self.object.subscription_status = 'subscribed'  # For now, just setting the status
+            pass
         messages.success(self.request, "User details updated successfully!")
         return super().form_valid(form)
