@@ -177,6 +177,7 @@ RQ_QUEUES = {
         'DB': 0,
         # 'PASSWORD': 'some-password',
         'DEFAULT_TIMEOUT': 360,
+        'NAME': 'emailgurus_queue'
     }
 }
 RQ_SHOW_ADMIN_LINK = True
