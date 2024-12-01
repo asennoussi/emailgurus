@@ -51,8 +51,8 @@
     <!-- Author Info and Publish Date -->
     <div class="author-info">
         <div>
-            {% if page.author.image %}
-                {% image page.author.image fill-32x32 as author_image %}
+            {% if page.author.photo %}
+                {% image page.author.photo fill-32x32 as author_image %}
                 <img src="{{ author_image.url }}" alt="{{ page.author.name }}" width="32" height="32">
             {% else %}
                 <img src="{% static 'images/default-author.png' %}" alt="{{ page.author.name }}" width="32" height="32">
