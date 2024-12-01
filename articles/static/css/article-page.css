@@ -377,6 +377,7 @@ picture img{
         min-width: 680px;
         width: fit-content;
         margin: 20px auto;
+        background:#f5f5f57a;
     }
 
     .cta-left {
