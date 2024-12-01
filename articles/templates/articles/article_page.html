@@ -1,0 +1,243 @@
+{% extends "landing/landing-base.html" %}
+{% load wagtailcore_tags %}
+{% load static %}
+{% load wagtailimages_tags %}
+{% load article_tags %}
+
+{% block logo_image %}
+    {% static 'homepage/images/purple.svg' %}
+{% endblock %}
+
+{% block additional_css %}
+    <link href="{% static 'css/article-page.css' %}" rel="stylesheet" type="text/css" />
+{% endblock additional_css %}
+
+{% block og_title %}{{ page.title }}{% endblock %}
+{% block og_description %}{{ page.description }}{% endblock %}
+{% block og_image %}{{ request.build_absolute_uri|add:'path/to/your/image.jpg' }}{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+
+{% block meta %}
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{{ page.description }}">
+    <meta name="author" content="{{ page.author.name }}">
+
+    <!-- OG Meta Tags to improve the way the post looks when you share the page on LinkedIn, Facebook, Google+ -->
+    <meta property="og:site_name" content="Emailgurus" /> <!-- website name -->
+    <meta property="og:site" content="{{ request.build_absolute_uri }}" /> <!-- website link -->
+    <meta property="og:title" content="{{ page.title }}"> <!-- title shown in the actual shared post -->
+    <meta property="og:description" content="{{ page.description }}"> <!-- description shown in the actual shared post -->
+    <meta property="og:url" content="{{ request.build_absolute_uri }}"> <!-- where do you want your post to link to -->
+    <meta property="og:type" content="article" />
+{% endblock meta %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+<!-- Upper Section -->
+<div class="blog-header">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'wagtail_serve' '' %}">Articles</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ page.title }}</li>
+        </ol>
+    </nav>
+
+    <!-- Title -->
+    <h1>{{ page.title }}</h1>
+
+    <!-- Author Info and Publish Date -->
+    <div class="author-info">
+        <div>
+            {% if page.author.image %}
+                {% image page.author.image fill-32x32 as author_image %}
+                <img src="{{ author_image.url }}" alt="{{ page.author.name }}" width="32" height="32">
+            {% else %}
+                <img src="{% static 'images/default-author.png' %}" alt="{{ page.author.name }}" width="32" height="32">
+            {% endif %}
+            <span class="author-name">{{ page.author.name }}</span>
+        </div>
+        <time datetime="{{ page.date|date:'Y-m-d' }}" class="publish-date">{{ page.date|date:"M d, Y" }}</time>
+    </div>
+
+    <!-- Intro -->
+    <p class="intro">{{ page.intro|richtext }}</p>
+
+    <!-- Call to Action -->
+    <aside class="cta">
+        <div class="cta-left">
+            <img src="{% static 'homepage/images/purple.svg' %}" alt="Logo emailgurus" class="cta-logo" />
+        </div>
+        <div class="cta-center">
+            <h4>Filter Emails from Unknown Senders</h4>
+            <p>Keep your inbox uncluttered</p>
+        </div>
+        <div class="cta-right">
+            <a href="{% url 'signup' %}" class="d-block btnOne cta-button">Sign Up</a>
+        </div>
+        <div class="cta-rating">
+            <span>⭐⭐⭐⭐⭐ <strong>4.8</strong><small> based on 1,031 user reviews</small></span>
+        </div>
+    </aside>
+</div>
+
+<!-- Left Sidebar (TOC and Social Sharing) -->
+<aside class="sidebar left-sidebar" id="toc">
+    <div class="sticky-content">
+        <!-- Table of Contents -->
+        <nav class="table-of-contents">
+            <h2>Table of Contents</h2>
+            {% generate_toc page.body|richtext as toc %}
+            {{ toc|safe }}
+        </nav>
+
+        <!-- Social Sharing -->
+        <section class="social-sharing">
+            <h2>Share this post</h2>
+            <div class="social-icons">
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank">
+                    <img src="{% static 'images/fb.svg' %}" alt="Facebook">
+                </a>
+                <a href="https://twitter.com/share?url={{ request.build_absolute_uri }}&text={{ page.title }}" target="_blank">
+                    <img src="{% static 'images/tw.svg' %}" alt="Twitter">
+                </a>
+                <a href="https://www.linkedin.com/shareArticle?url={{ request.build_absolute_uri }}&title={{ page.title }}" target="_blank">
+                    <img src="{% static 'images/in.svg' %}" alt="LinkedIn">
+                </a>
+                    
+            </div> 
+        </section>
+    </div>
+</aside>
+
+<!-- Main Layout -->
+<div class="blog-page-container">
+    <div class="content-wrapper">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- TOC at the Top on Mobile -->
+            <div class="toc-mobile">
+                <details>
+                    <summary>Table of Contents</summary>
+                    <nav class="table-of-contents">
+                        {% generate_toc page.body|richtext as toc %}
+                        {{ toc|safe }}
+                    </nav>
+                </details>
+            </div>
+
+            <div class="content-container">
+                <!-- Main Content Area -->
+                <article class="content-area" id="content">
+                    {{ page.body|richtext }}
+                </article>
+            </div>
+        </main>
+        <!-- Right Aside -->
+        <aside class="right-sidebar">
+            <!-- Sticky Content -->
+            <div class="sticky-sidebar">
+                <!-- Sidebar content -->
+                <section class="sidebar-content">
+                    <picture>
+                        <source media="(max-width: 600px)" srcset="{% static 'images/emails.svg' %}">
+                        <source media="(min-width: 601px)" srcset="{% static 'images/emails.svg' %}">
+                        <img src="{% static 'images/emails.svg' %}" alt="Join our community">
+                    </picture>
+                    <span class="h4">Stay Updated on Email Filtering</span>
+                    <p>Get the latest tips for a clean inbox</p>
+                    <a class="btnOne cta-button" href="{% url 'signup' %}">Sign Up</a>
+                </section>
+            </div>
+        </aside>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block additional_js %}
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        }
+    };
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rootElement = document.documentElement;
+    const headerElement = document.querySelector('.blog-header');
+    const footerElement = document.querySelector('.faqMain');
+
+    let isHeaderVisible = true;
+    let isFooterVisible = false;
+
+    function updateShowToc() {
+        if (!isHeaderVisible && !isFooterVisible) {
+            rootElement.classList.add('show-toc');
+        } else {
+            rootElement.classList.remove('show-toc');
+        }
+    }
+
+    const observerOptions = {
+        root: null,
+        rootMargin: '-150px 0px 0px 0px', // Adjust this value as needed
+        threshold: 0
+    };
+
+    // Observe header visibility
+    const headerObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            isHeaderVisible = entry.isIntersecting;
+            updateShowToc();
+        });
+    }, observerOptions);
+    headerObserver.observe(headerElement);
+
+    // Observe footer visibility
+    const footerObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            isFooterVisible = entry.isIntersecting;
+            updateShowToc();
+        });
+    }, observerOptions);
+    footerObserver.observe(footerElement);
+
+    // Automatically wrap unwrapped formulas with \( \)
+    const contentArea = document.querySelector('.content-area');
+    if (contentArea) {
+        contentArea.innerHTML = contentArea.innerHTML.replace(/(\([^()]*\\frac[^()]*\))/g, function(match) {
+            return '\\(' + match.slice(1, -1) + '\\)';
+        });
+
+        // Correct escaped LaTeX characters
+        let content = contentArea.innerHTML;
+
+        // Replace escaped backslashes
+        content = content.replace(/\\\\/g, '\\');
+
+        // Replace HTML entities for backslashes
+        content = content.replace(/&amp;#x5c;/g, '\\');
+        content = content.replace(/&#x5c;/g, '\\');
+        content = content.replace(/&amp;#92;/g, '\\');
+        content = content.replace(/&#92;/g, '\\');
+
+        contentArea.innerHTML = content;
+    }
+});
+</script>
+<script src="{% static 'homepage/js/jquery.min.js' %}"></script> <!-- jQuery for Bootstrap's JavaScript plugins -->
+<script src="{% static 'homepage/js/popper.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/bootstrap.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/jquery.easing.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/swiper.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/jquery.magnific-popup.js' %}"></script>
+<!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/validator.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/scripts.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+
+{% endblock additional_js %}

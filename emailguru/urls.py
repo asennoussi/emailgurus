@@ -18,6 +18,9 @@ from django.urls import path, include
 from landing.views import HomeView
 from accounts.views import ActivateView, LoginView, PasswordResetConfirmView, PasswordResetView, SignUpView, LogoutView, CustomUserEditView
 from dashboard.views import EmailCatcher
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail import urls as wagtail_urls
+from wagtail.documents import urls as wagtaildocs_urls
 
 
 urlpatterns = [
@@ -38,4 +41,8 @@ urlpatterns = [
     path('django-rq/', include('django_rq.urls')),
     path('paypal/', include('paypal.standard.ipn.urls')),
     path('catch/new-email', EmailCatcher.catch_email, name='catch_email'),
+    path('cms/', include(wagtailadmin_urls)),
+    path('documents/', include(wagtaildocs_urls)),
+    # Optionally, include Wagtail's page serving mechanism:
+    path('articles/', include(wagtail_urls)),
 ]

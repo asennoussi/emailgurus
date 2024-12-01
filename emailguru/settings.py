@@ -44,10 +44,25 @@ INSTALLED_APPS = [
     'dashboard.apps.DashboardConfig',
     'onboarding.apps.OnboardingConfig',
     'referral.apps.ReferralConfig',
+    
+    'articles',
 
     'django_rq',
     'paypal.standard.ipn',
     'axes',
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.admin',
+    'modelcluster',
+    'taggit',
+    'wagtail',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -71,6 +86,7 @@ MIDDLEWARE = [
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 
     'axes.middleware.AxesMiddleware',
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'emailguru.urls'
@@ -153,6 +169,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+
+
 STATIC_URL = 'static/'
 STATIC_ROOT = str(
     Path(__file__).resolve().parent.parent) + '/static'
@@ -209,6 +229,9 @@ AXES_META_PRECEDENCE_ORDER = [
 GTM_CONTAINER_ID = 'GTM-XXXXXXX'
 
 REFERRAL_PAYOUT_VALUE = 2
+
+WAGTAIL_SITE_NAME = 'Emailgurus Blog'
+WAGTAILADMIN_BASE_URL = '/cms'
 
 try:
     from .local_settings import *

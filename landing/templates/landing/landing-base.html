@@ -1,5 +1,6 @@
 {% load static %}
 {% load settings_value %}
+{% load wagtailcore_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,6 +8,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    {% block meta %}
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="Emailgurus is an online solution that helps you keep your inbox focused on your contacts.">
@@ -15,14 +17,15 @@
     <!-- OG Meta Tags to improve the way the post looks when you share the page on LinkedIn, Facebook, Google+ -->
     <meta property="og:site_name" content="" /> <!-- website name -->
     <meta property="og:site" content="" /> <!-- website link -->
-    <meta property="og:title" content="" /> <!-- title shown in the actual shared post -->
-    <meta property="og:description" content="" /> <!-- description shown in the actual shared post -->
-    <meta property="og:image" content="" /> <!-- image link, make sure it's jpg -->
-    <meta property="og:url" content="" /> <!-- where do you want your post to link to -->
+    <meta property="og:title" content="{% block og_title %}{% endblock %}"> <!-- title shown in the actual shared post -->
+    <meta property="og:description" content="{% block og_description %}{% endblock %}"> <!-- description shown in the actual shared post -->
+    <meta property="og:image" content="{% block og_image %}{% endblock %}"> <!-- image link, make sure it's jpg -->
+    <meta property="og:url" content="{% block og_url %}{% endblock %}"> <!-- where do you want your post to link to -->
     <meta property="og:type" content="article" />
+    {% endblock meta %}
 
     <!-- Website Title -->
-    <title>{% block title %}My amazing site{% endblock %}</title>
+    <title>{% block title %}Filter Emails from unknown senders on Gmail - Emailgurus{% endblock %}</title>
 
     <!-- Styles -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap&subset=latin-ext"
@@ -33,6 +36,8 @@
     <link href="{% static 'homepage/css/magnific-popup.css' %}" rel="stylesheet">
     <link href="{% static 'homepage/css/styles.css' %}" rel="stylesheet">
 
+    {% block additional_css %}
+{% endblock additional_css %}
 
     <!-- Favicon  -->
     <link rel="icon" href="images/favicon.png">
@@ -64,8 +69,7 @@
             <!-- <a class="navbar-brand logo-text page-scroll" href="index.html">Tivo</a> -->
 
             <!-- Image Logo -->
-            <a class="navbar-brand logo-image" href="/"><img src="{% static 'homepage/images/white.svg' %}"
-                    alt="alternative"></a>
+            <a class="navbar-brand logo-image" href="/"><img src="{% block logo_image %}{% static 'homepage/images/white.svg' %}{% endblock %}" alt="alternative"></a>
 
             <!-- Mobile Menu Toggle Button -->
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
@@ -84,7 +88,7 @@
                         <a class="nav-link page-scroll" href="https://github.com/asennoussi/emailgurus">GITHUB</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link page-scroll" href="/filter-emails/">BENEFITS</a>
+                        <a class="nav-link page-scroll" href="{% slugurl 'filter-emails-unknown-senders-gmail' %}">FILTER EMAILS</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link page-scroll" href="#features">FEATURES</a>
@@ -115,14 +119,15 @@
     var gtm_container = '{% settings_value "GTM_CONTAINER_ID" %}';
     (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer',gtm_container);</script>
 <!-- End Google Tag Manager -->
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={% settings_value "GTM_CONTAINER_ID" %}"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+    {% block additional_js %}
+{% endblock additional_js %}
 </body>
 
 </html>
