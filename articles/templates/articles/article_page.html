@@ -26,7 +26,7 @@
     <meta property="og:site_name" content="Emailgurus" /> <!-- website name -->
     <meta property="og:site" content="{{ request.build_absolute_uri }}" /> <!-- website link -->
     <meta property="og:title" content="{{ page.title }}"> <!-- title shown in the actual shared post -->
-    <meta property="og:description" content="{{ page.description }}"> <!-- description shown in the actual shared post -->
+    <meta property="og:description" content="{{ page.search_description }}"> <!-- description shown in the actual shared post -->
     <meta property="og:url" content="{{ request.build_absolute_uri }}"> <!-- where do you want your post to link to -->
     <meta property="og:type" content="article" />
 {% endblock meta %}
@@ -34,6 +34,7 @@
 {% block title %}{{ page.title }}{% endblock %}
 
 {% block content %}
+
 <!-- Upper Section -->
 <div class="blog-header">
     <!-- Breadcrumb -->
