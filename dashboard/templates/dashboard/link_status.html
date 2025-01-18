@@ -45,12 +45,7 @@
 <div class="d-flex justify-content-center">
   <a class="d-inline-flex align-items-center me-3 mb-3" type="button"
     href="{% url 'link_google' %}">
-    <div class="google-btn">
-      <div class="google-icon-wrapper">
-        <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
-      </div>
-      <p class="btn-text"><b>Connect with google</b></p>
-    </div>
+    <img src="{% static 'homepage/images/google.svg' %}" alt="Google" width="250">
   </a>
 </div>
 {% endif %}

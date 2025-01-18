@@ -1,5 +1,6 @@
 {% extends "landing/landing-base.html" %}
 {% load static %}
+{% load socialaccount %}
 {% block title %} Emailgurus - Create a new account {% endblock %}
 {% block content %}
 <!-- Header -->
@@ -12,6 +13,16 @@
                         href="{% url 'login' %}">Log In</a></p>
                 <!-- Sign Up Form -->
                 <div class="form-container">
+                    <!-- Add Google signup button at top -->
+                    <div class="form-group">
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-block btn-google">
+                            <img src="{% static 'homepage/images/google.svg' %}" alt="Google" width="250">
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        <hr class="separator">
+                        <div class="separator-text">or</div>
+                    </div>
                     <form id="signUpForms" action="" method="post" data-toggle="validator" data-focus="false">
                         {% csrf_token %}
                         <div class="form-group">
