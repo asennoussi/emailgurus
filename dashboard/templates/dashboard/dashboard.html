@@ -165,12 +165,7 @@
 <div class="d-flex justify-content-center">
   <a class="d-inline-flex align-items-center me-3 mb-3" type="button"
     href="{% url 'link_google' %}">
-    <div class="google-btn">
-      <div class="google-icon-wrapper">
-        <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
-      </div>
-      <p class="btn-text"><b>Connect with google</b></p>
-    </div>
+    <img src="{% static 'homepage/images/google.svg' %}" alt="Google" width="250">
   </a>
 </div>
 <div class="d-flex justify-content-center">
@@ -178,8 +173,8 @@
     <h4 class="alert-heading">Privacy policy</h4>
     <ol>
       <li>We don't read nor store your emails content</li>
-      <li>The contact information is encrypted SHA256 and the filtering happens only on an encrypted basis.</li>
-      <li>We don't use your email & contacts data for any commercial activity.</li>
+      <li>The contact information is hashed SHA256 and the filtering happens only on an encrypted basis.</li>
+      <li>We don't use your email or contacts data for any commercial activity.</li>
       <li>You can at any time and any place request a complete and utter deletion of your data from all our servers.
       </li>
     </ol>

@@ -46,6 +46,7 @@ urlpatterns = [
     path('documents/', include(wagtaildocs_urls)),
     # Optionally, include Wagtail's page serving mechanism:
     path('articles/', include(wagtail_urls)),
+    path('accounts/', include('allauth.urls')),  # Replace social-auth URLs
 ]
 
 if settings.DEBUG:
