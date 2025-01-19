@@ -1,4 +1,3 @@
-
 import random
 import string
 from django.conf import settings
@@ -142,6 +141,7 @@ class LinkedAccounts(models.Model):
     whitelist_domains = ArrayField(
         models.CharField(max_length=255), blank=True)
     invites_sent = models.BooleanField(default=False)
+    use_contact_labels = models.BooleanField(default=False)
 
     def __str__(self):
         return self.associated_email
