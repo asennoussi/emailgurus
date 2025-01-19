@@ -28,10 +28,13 @@ SECRET_KEY = 'django-insecure-SOME_RANDOM_KEY'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1', 'localhost']
+    '127.0.0.1', 
+    'localhost',
+    '.ngrok-free.app'  # Allow all ngrok-free.app subdomains
+]
 
-CSRF_TRUSTED_ORIGINS = ['https://*.ngrok.io',
-                        'https://*.127.0.0.1', 'https://*.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app',
+                       'https://*.127.0.0.1']
 
 # Application definition
 
@@ -247,6 +250,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_ADAPTER = 'accounts.adapters.CustomSocialAccountAdapter'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'  # Force HTTPS for auth callbacks
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'

@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from landing.views import HomeView
 from accounts.views import ActivateView, LoginView, PasswordResetConfirmView, PasswordResetView, SignUpView, LogoutView, CustomUserEditView
-from dashboard.views import EmailCatcher
+from dashboard.views import EmailCatcherView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
@@ -41,7 +41,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('django-rq/', include('django_rq.urls')),
     path('paypal/', include('paypal.standard.ipn.urls')),
-    path('catch/new-email', EmailCatcher.catch_email, name='catch_email'),
+    path('catch/new-email', EmailCatcherView.as_view(), name='catch_email'),
     path('cms/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
     # Optionally, include Wagtail's page serving mechanism:

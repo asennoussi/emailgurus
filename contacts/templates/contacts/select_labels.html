@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Select Contact Labels</h2>
+    <p>Choose which labels you want to use for contact management:</p>
+    
+    <form method="post" action="{% url 'sync_contacts_with_labels' linked_account.id %}">
+        {% csrf_token %}
+        <div class="row">
+            {% for label in available_labels %}
+            <div class="col-md-4 mb-3">
+                <div class="form-check">
+                    <input type="checkbox" 
+                           name="selected_labels" 
+                           value="{{ label.name }}|{{ label.id }}"
+                           class="form-check-input" 
+                           id="label_{{ label.id }}">
+                    <label class="form-check-label" for="label_{{ label.id }}">
+                        {{ label.name }}
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Sync Contacts with Selected Labels</button>
+            <a href="{% url 'linked_accounts' %}" class="btn btn-secondary ml-2">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
