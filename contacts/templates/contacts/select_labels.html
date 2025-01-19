@@ -1,12 +1,25 @@
-{% extends 'base.html' %}
+{% extends 'dashboard/base.html' %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Select Contact Labels</h2>
-    <p>Choose which labels you want to use for contact management:</p>
+    <h2>Contact Labels Selection</h2>
+    <div class="alert alert-info">
+        <p><strong>Note:</strong> Selecting labels here will:</p>
+        <ul>
+            <li>Import all your contacts</li>
+            <li>Create the selected labels in the system</li>
+            <li>Associate contacts with their corresponding labels</li>
+        </ul>
+    </div>
     
     <form method="post" action="{% url 'sync_contacts_with_labels' linked_account.id %}">
         {% csrf_token %}
+        
+        {% if not available_labels %}
+        <div class="alert alert-warning">
+            No contact labels found in your Google Contacts.
+        </div>
+        {% else %}
         <div class="row">
             {% for label in available_labels %}
             <div class="col-md-4 mb-3">
@@ -23,9 +36,12 @@
             </div>
             {% endfor %}
         </div>
+        {% endif %}
         
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Sync Contacts with Selected Labels</button>
+            <button type="submit" class="btn btn-primary" {% if not available_labels %}disabled{% endif %}>
+                Import Contacts & Configure Labels
+            </button>
             <a href="{% url 'linked_accounts' %}" class="btn btn-secondary ml-2">Cancel</a>
         </div>
     </form>
