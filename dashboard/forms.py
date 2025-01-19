@@ -28,19 +28,27 @@ class PaymentButtonForm(PayPalPaymentsForm):
 
 
 class UpdateLinkedAccountForm(forms.ModelForm):
-
     class Meta:
         model = LinkedAccounts
-        fields = ['active', 'archive_emails',
-                  'trash_emails', 'check_spam', 'whitelist_domains', 'whitelist_on_label', 'use_contact_labels']
+        fields = [
+            'active',
+            'archive_emails',
+            'trash_emails',
+            'check_spam',
+            'whitelist_domains',
+            'whitelist_on_label',
+            'use_contact_labels',
+            'mark_first_outsider',
+        ]
         widgets = {
             'active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'whitelist_domains': forms.HiddenInput(attrs={'id': 'inputWhitelist'}),
             'archive_emails': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'trash_emails': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'check_spam': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'whitelist_on_label': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'use_contact_labels': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+            'use_contact_labels': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'whitelist_domains': forms.HiddenInput(attrs={'id': 'inputWhitelist'}),
+            'mark_first_outsider': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 

@@ -42,6 +42,7 @@ def credentials_to_dict(credentials):
         'scopes': credentials.scopes
     })
 
+
 def _build_credentials(signed_credentials):
     """
     Helper to safely unsign and build a google.oauth2.credentials.Credentials object
@@ -57,6 +58,7 @@ def _build_credentials(signed_credentials):
         scopes=credentials_dict["scopes"]
     )
 
+
 def get_scopes():
     """
     Returns the list of required Google API scopes.
@@ -68,6 +70,7 @@ def get_scopes():
         '/auth/contacts.other.readonly'
     ]
     return ['https://www.googleapis.com' + x for x in scopes_urls]
+
 
 def get_google_flow():
     """
@@ -87,6 +90,7 @@ def get_google_flow():
     except FileNotFoundError:
         print("The file doesn't exist. Please create credentials file")
         return {}
+
 
 def get_associated_email(flow):
     """
@@ -112,6 +116,7 @@ def get_email_domain(email):
     domain = email[email.index('@') + 1:]
     return '' if domain == 'gmail.com' else domain
 
+
 def is_user_active(user):
     """
     Checks whether a user is active based on subscription status or expiration.
@@ -119,7 +124,7 @@ def is_user_active(user):
     today = timezone.now().date()
     return (
         user.subscription_status in ['subscribed', 'trial'] or
-        (user.subscription_status == 'canceled' and user.expires_at.date() > today)
+        (user.subscription_status == 'canceled' and user.expires_at and user.expires_at.date() > today)
     )
 
 ################################################################################
@@ -186,6 +191,7 @@ def update_contacts(associated_email, selected_labels=None):
     # 6) Reschedule contact job
     _reschedule_contact_job(la)
 
+
 def _reschedule_contact_job(linked_account):
     """
     Schedules or re-schedules the next automatic call to update_contacts in 1 hour.
@@ -224,6 +230,7 @@ def _reschedule_contact_job(linked_account):
             linked_account=linked_account,
             job_type='contact'
         )
+
 
 def get_contacts(credentials, linked_account, hashed=True, selected_labels=None):
     """
@@ -284,7 +291,7 @@ def get_contacts(credentials, linked_account, hashed=True, selected_labels=None)
                         continue
                     hashed_email = sha256(raw_email.encode('utf-8')).hexdigest() if hashed else raw_email
 
-                    # Filter only the selected labels that match this person's group membership
+                    # Filter only the selected labels that match the person’s membership
                     matching_labels = [
                         lbl for lbl in selected_labels if lbl.name in person_groups
                     ] if selected_labels else []
@@ -303,6 +310,7 @@ def get_contacts(credentials, linked_account, hashed=True, selected_labels=None)
     except HttpError as err:
         print(f"Error accessing Google People API: {err}")
         return []
+
 
 def _get_contacts_email_list_only(credentials, hashed=True):
     """
@@ -354,6 +362,7 @@ def send_invite_emails(user):
     queue = get_queue('default')
     queue.enqueue(schedule_chunk_emails, user)
 
+
 def schedule_chunk_emails(user, chunk_size=100):
     """
     Batches the user's contacts into scheduled RQ jobs to send invite emails.
@@ -393,6 +402,7 @@ def schedule_chunk_emails(user, chunk_size=100):
         except Exception as e:
             print(f"Error scheduling invites for {la.associated_email}: {e}")
 
+
 def send_email_chunk(email_chunk, user):
     """
     Sends out invite emails in chunks to avoid mass mail in a single moment.
@@ -413,6 +423,7 @@ def send_email_chunk(email_chunk, user):
         return "Email sent"
     except Exception as e:
         print(f"Error sending email chunk: {e}")
+
 
 def get_other_contacts(credentials, hashed=True):
     """
@@ -499,8 +510,8 @@ def watch_email(associated_email):
         queue = get_queue('default')
 
         if job.exists():
-            job_queue = queue.fetch_job(job[0].job_id)
-            if not job_queue or job_queue.get_status() != 'scheduled':
+            existing_job = queue.fetch_job(job[0].job_id)
+            if not existing_job or existing_job.get_status() != 'scheduled':
                 nq = queue.enqueue_in(timedelta(days=1), watch_email, associated_email)
                 job.delete()
                 Jobs.objects.create(
@@ -521,6 +532,7 @@ def watch_email(associated_email):
     except Exception as error:
         print(f'An error occurred: {error}')
 
+
 def stop_watcher(associated_email):
     """
     Calls Gmail's stop() watch method to stop receiving push notifications.
@@ -540,11 +552,13 @@ def stop_watcher(associated_email):
 def handle_email(email_id, from_email, user, associated_email):
     """
     Determines how to handle an incoming email based on:
-      - Whether the user is active.
-      - Whether the LinkedAccount is active.
-      - Whether the email domain is whitelisted.
-      - Whether it's from an existing contact or an existing thread.
-    Then applies the appropriate Gmail label modifications (pass or filter).
+      - Whether the user is active or domain is whitelisted or LA is inactive => pass.
+      - If mark_first_outsider is ON and truly the first time we see this sender => 
+        label outsider but do NOT remove from INBOX.
+      - Else, if from a known contact or an existing thread => pass.
+      - Otherwise => filter (archive or trash).
+    
+    Logs the outcome in EmailDebugInfo and increments FilteredEmails accordingly.
     """
     la = LinkedAccounts.objects.get(associated_email=associated_email)
     encrypted_contact = sha256(from_email.encode('utf-8')).hexdigest()
@@ -554,94 +568,120 @@ def handle_email(email_id, from_email, user, associated_email):
     service = build('gmail', 'v1', credentials=credentials)
 
     debug_info = []
+    process_status = ''
 
-    # Evaluate user & domain states
+    # 1) Evaluate quick pass conditions
     if not is_user_active(user):
-        debug_info.append("User is not active.")
+        debug_info.append("User is not active -> pass.")
+        process_status = 'passed'
     elif domain in la.whitelist_domains:
-        debug_info.append(f"Domain {domain} is whitelisted.")
+        debug_info.append(f"Domain '{domain}' is whitelisted -> pass.")
+        process_status = 'passed'
     elif not la.active:
-        debug_info.append("Linked account is not active.")
-    else:
-        # If the email is from an existing contact or an existing thread, pass it
-        if Contact.objects.filter(hashed_email=encrypted_contact, linked_account=la).exists() \
-           or is_part_of_contact_thread(service, email_id, user, la):
-            debug_info.append("Sender is in the contact list or existing thread.")
-        else:
-            debug_info.append("Email did not meet any pass criteria.")
+        debug_info.append("Linked account is not active -> pass.")
+        process_status = 'passed'
 
-    # Log debug info
+    # 2) If no pass condition triggered, proceed with advanced logic
+    if not process_status:
+        # Check if this hashed email is truly first-time for this LA
+        prior_debug_exists = EmailDebugInfo.objects.filter(
+            from_email_hashed=encrypted_contact,
+            linked_account=la
+        ).exists()
+
+        # (A) If user wants to mark first-time outsiders, do so
+        if la.mark_first_outsider and not prior_debug_exists:
+            debug_info.append("First-time outsider. Labeling but not archiving.")
+            process_status = 'outsider'
+
+            # If you have an outsider label in settings, add it here:
+            if hasattr(settings, 'EG_OUTSIDER_LABEL_ID') and settings.EG_OUTSIDER_LABEL_ID:
+                update_label = {
+                    "addLabelIds": [settings.EG_OUTSIDER_LABEL_ID],
+                    "removeLabelIds": []
+                }
+                try:
+                    service.users().messages().modify(userId='me', id=email_id, body=update_label).execute()
+                except HttpError as e:
+                    debug_info.append(f"Error labeling outsider: {e}")
+
+        else:
+            # (B) If from existing contact or existing thread => pass
+            if Contact.objects.filter(hashed_email=encrypted_contact, linked_account=la).exists() \
+               or is_part_of_contact_thread(service, email_id, user, la):
+                debug_info.append("Sender in contact list or existing thread -> pass.")
+                process_status = 'passed'
+
+                # Possibly remove your filter label if it was applied previously
+                # E.g. if you store the ID in settings.EG_LABEL_ID or la.label
+                if hasattr(settings, 'EG_LABEL_ID') and settings.EG_LABEL_ID:
+                    remove_label_body = {
+                        "addLabelIds": [],
+                        "removeLabelIds": [settings.EG_LABEL_ID]
+                    }
+                    try:
+                        service.users().messages().modify(userId='me', id=email_id, body=remove_label_body).execute()
+                    except HttpError as e:
+                        debug_info.append(f"Error removing filter label: {e}")
+
+            else:
+                # (C) Not whitelisted or contact => filter (archive or trash)
+                debug_info.append("Not whitelisted/contact -> filtering.")
+                process_status = 'filtered'
+
+                # Decide whether to trash or just archive
+                if la.trash_emails:
+                    update_label = {
+                        "addLabelIds": ["TRASH"],
+                        "removeLabelIds": ["INBOX"]
+                    }
+                else:
+                    # If user wants to archive
+                    if la.archive_emails:
+                        # If you track your filter label in settings.EG_LABEL_ID or la.label
+                        filter_label_id = getattr(settings, 'EG_LABEL_ID', '')
+                        update_label = {
+                            "addLabelIds": [filter_label_id] if filter_label_id else [],
+                            "removeLabelIds": ["INBOX"]
+                        }
+                    else:
+                        # Just label without removing INBOX
+                        filter_label_id = getattr(settings, 'EG_LABEL_ID', '')
+                        update_label = {
+                            "addLabelIds": [filter_label_id] if filter_label_id else [],
+                            "removeLabelIds": []
+                        }
+
+                try:
+                    service.users().messages().modify(userId='me', id=email_id, body=update_label).execute()
+                except HttpError as e:
+                    debug_info.append(f"Error filtering message: {e}")
+
+    # 3) Record the debug info
     debug_info_str = " | ".join(debug_info)
     EmailDebugInfo.objects.create(
         date_processed=timezone.now(),
-        process_status='passed' if ("Sender is in the contact list" in debug_info_str \
-                                    or "existing thread" in debug_info_str) else 'filtered',
+        process_status=process_status,
         owner=user,
         linked_account=la,
         debug_info=debug_info_str,
         from_email_hashed=encrypted_contact
     )
 
-    # If user not active, domain whitelisted, or LA inactive => do nothing special
-    if not is_user_active(user) or domain in la.whitelist_domains or not la.active:
-        return
-
-    # If the email is from a contact or existing thread, remove the filter label or add contact label
-    if Contact.objects.filter(hashed_email=encrypted_contact, linked_account=la).exists() \
-       or is_part_of_contact_thread(service, email_id, user, la):
-        update_label = {
-            "addLabelIds": [],
-            "removeLabelIds": [la.label]
-        }
-        # If the user wants to use contact-specific labels, you could add logic here
-        # to apply the relevant label for that contact. e.g.:
-        # if la.use_contact_labels:
-        #    contact = ...
-        #    update_label["addLabelIds"] = [<some label ID>]
-
-        service.users().messages().modify(
-            userId='me', id=email_id, body=update_label
-        ).execute()
-
-        passed_email, _ = FilteredEmails.objects.get_or_create(
+    # 4) Tally the day’s result in FilteredEmails
+    if process_status in ['filtered', 'passed', 'outsider']:
+        filt_obj, created = FilteredEmails.objects.get_or_create(
             date_filtered=timezone.now(),
-            process_status='passed',
+            process_status=process_status,
             owner=user,
             linked_account=la
         )
-        passed_email.count_emails += 1
-        passed_email.save()
-        return
+        if not created:
+            filt_obj.count_emails += 1
+        else:
+            filt_obj.count_emails = 1
+        filt_obj.save()
 
-    # Otherwise, filter the email
-    update_label = {
-        "addLabelIds": [la.label],
-        "removeLabelIds": ["INBOX"]
-    }
-    if not la.archive_emails:
-        update_label.pop('removeLabelIds', None)
-
-    if la.trash_emails:
-        update_label = {
-            "addLabelIds": ["TRASH"],
-            "removeLabelIds": ["INBOX"]
-        }
-
-    service.users().messages().modify(
-        userId='me', id=email_id, body=update_label
-    ).execute()
-
-    filtered_email, created = FilteredEmails.objects.get_or_create(
-        date_filtered=timezone.now(),
-        process_status='filtered',
-        owner=user,
-        linked_account=la
-    )
-    if not created:
-        filtered_email.count_emails += 1
-    else:
-        filtered_email.count_emails = 1
-    filtered_email.save()
 
 def is_part_of_contact_thread(service, email_id, user, la):
     """
@@ -667,9 +707,7 @@ def is_part_of_contact_thread(service, email_id, user, la):
                     match = re.search(email_pattern, from_value)
                     if match:
                         from_email = match.group(1)
-                        encrypted_contact = sha256(
-                            from_email.encode('utf-8')
-                        ).hexdigest()
+                        encrypted_contact = sha256(from_email.encode('utf-8')).hexdigest()
                         if Contact.objects.filter(hashed_email=encrypted_contact, linked_account=la).exists():
                             return True
 
@@ -687,6 +725,9 @@ def create_or_update_linked_account(request, credentials, email):
     """
     Creates or updates a LinkedAccounts entry for the user's Gmail connection.
     Also creates/fetches a label used for archiving, then starts a watcher.
+
+    If you already handle label creation or store label IDs in settings, 
+    you can adjust that logic accordingly.
     """
     service = build('gmail', 'v1', credentials=credentials)
     new_label_body = {
@@ -722,6 +763,8 @@ def create_or_update_linked_account(request, credentials, email):
     credentials_dict = credentials_to_dict(credentials)
     domain = get_email_domain(email)
 
+    from django.core.exceptions import ObjectDoesNotExist
+
     # -----------------------------------------
     # Scenario A: We have a refresh token
     # -----------------------------------------
@@ -740,6 +783,10 @@ def create_or_update_linked_account(request, credentials, email):
                 linked_account.whitelist_domains.append(domain)
             linked_account.save()
 
+        # In either case, set the "label" field so we store the label ID if desired
+        linked_account.label = created_label
+        linked_account.save()
+
         # Start inbox watching
         django_rq.enqueue(watch_email, associated_email=email)
         return linked_account, created, credentials_dict, created_label, False
@@ -749,7 +796,6 @@ def create_or_update_linked_account(request, credentials, email):
     # (Potential "re-activation" or partial token)
     # -----------------------------------------
     else:
-        from django.core.exceptions import ObjectDoesNotExist
         try:
             # Attempt to fetch existing account
             linked_account = LinkedAccounts.objects.get(
@@ -759,8 +805,6 @@ def create_or_update_linked_account(request, credentials, email):
             # "Re-activate" scenario
             if linked_account.deleted:
                 linked_account.deleted = False
-
-            # Update the label reference, if needed
             linked_account.label = created_label
             linked_account.save()
 
@@ -770,41 +814,13 @@ def create_or_update_linked_account(request, credentials, email):
 
         except ObjectDoesNotExist:
             # No LinkedAccount found -> fallback approach
-            # If you prefer to block or show an error, you can do so.
-            # Here, we create a new LinkedAccount with limited credentials.
             linked_account = LinkedAccounts.objects.create(
                 owner=request.user,
                 associated_email=email,
-                credentials=credentials_dict,  # might be missing refresh_token
+                credentials=credentials_dict,
                 label=created_label,
                 whitelist_domains=[domain],
                 deleted=False
             )
             django_rq.enqueue(watch_email, associated_email=email)
             return linked_account, True, credentials_dict, created_label, False
-
-################################################################################
-#                        PAYPAL BUTTON / SUBSCRIPTION
-################################################################################
-
-def get_paypal_button(request):
-    """
-    Returns the PaymentButtonForm pre-initialized for a subscription.
-    """
-    paypal_dict = {
-        "cmd": "_xclick-subscriptions",
-        'business': settings.PAYPAL_RECEIVER_EMAIL,
-        "a3": 12.99,  # monthly price
-        "p3": 1,      # duration of each unit
-        "t3": 'M',    # 'M' for month
-        "src": "1",   # make payments recur
-        "sra": "1",   # reattempt payment on payment error
-        "no_note": "1",
-        'item_name': 'Emailgurus subscription',
-        'custom': request.user.id,     # pass user_id
-        'currency_code': 'USD',
-        'notify_url': request.build_absolute_uri(reverse_lazy('paypal-ipn')),
-        'return_url': request.build_absolute_uri(reverse_lazy('payment_done')),
-        'cancel_return': request.build_absolute_uri(reverse_lazy('payment_canceled')),
-    }
-    return PaymentButtonForm(initial=paypal_dict)

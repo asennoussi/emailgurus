@@ -75,6 +75,13 @@
           {{ form.use_contact_labels }}
         </div>
 
+        <div class="form-check form-switch">
+          <label class="form-check-label" for="{{ form.mark_first_outsider.id_for_label }}">
+            Only label First-time senders
+          </label>
+          {{ form.mark_first_outsider }}
+        </div>
+
         <div class="row">
             <div class="form-group col-md-12 text-center">
                 <button type="submit" class="btn btn-warning">Update</button>
