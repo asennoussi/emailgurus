@@ -142,6 +142,7 @@ class LinkedAccounts(models.Model):
         models.CharField(max_length=255), blank=True)
     invites_sent = models.BooleanField(default=False)
     use_contact_labels = models.BooleanField(default=False)
+    mark_first_outsider = models.BooleanField(default=False)
 
     def __str__(self):
         return self.associated_email
