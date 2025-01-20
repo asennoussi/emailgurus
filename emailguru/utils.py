@@ -627,10 +627,10 @@ def handle_email(email_id, from_email, user, associated_email):
                 process_status = 'passed'
 
                 # Possibly remove your filter label if it was applied previously
-                if hasattr(settings, 'EG_LABEL_ID') and settings.EG_LABEL_ID:
+                if hasattr(settings, 'EG_LABEL') and settings.EG_LABEL:
                     remove_label_body = {
                         "addLabelIds": [],
-                        "removeLabelIds": [settings.EG_LABEL_ID]
+                        "removeLabelIds": [settings.EG_LABEL]
                     }
                     try:
                         service.users().messages().modify(userId='me', id=email_id, body=remove_label_body).execute()
@@ -651,14 +651,14 @@ def handle_email(email_id, from_email, user, associated_email):
                 else:
                     # If user wants to archive
                     if la.archive_emails:
-                        filter_label_id = getattr(settings, 'EG_LABEL_ID', '')
+                        filter_label_id = getattr(settings, 'EG_LABEL', '')
                         update_label = {
                             "addLabelIds": [filter_label_id] if filter_label_id else [],
                             "removeLabelIds": ["INBOX"]
                         }
                     else:
                         # Just label without removing INBOX
-                        filter_label_id = getattr(settings, 'EG_LABEL_ID', '')
+                        filter_label_id = getattr(settings, 'EG_LABEL', '')
                         update_label = {
                             "addLabelIds": [filter_label_id] if filter_label_id else [],
                             "removeLabelIds": []
