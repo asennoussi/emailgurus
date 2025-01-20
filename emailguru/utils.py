@@ -136,7 +136,7 @@ def update_contacts(associated_email, selected_labels=None):
     1) Delete all existing Contacts (M2M relationships removed automatically).
     2) Delete all existing Labels for the LinkedAccount.
     3) Create fresh Label objects for the selected labels (if any).
-    4) Retrieve & create new Contacts from People API.
+    4) Retrieve & create new Contacts from People API, ensuring no duplicates.
     5) Attach contacts to any relevant label(s).
     6) Reschedule contact sync job for repeated updates.
     """
@@ -173,17 +173,31 @@ def update_contacts(associated_email, selected_labels=None):
         selected_labels=new_labels
     )
 
-    # 5) Create new Contact objects and attach relevant labels
-    created_count = 0
+    # --- FIX: Deduplicate by hashed_email before creating ---
+    # Build a dict keyed by hashed_email, merging label sets for that email.
+    # contacts_data is a list of {'hashed_email': x, 'labels': [Label, ...]}
+    unique_contacts_map = {}
     for data in contacts_data:
+        hashed_email = data['hashed_email']
+        if hashed_email not in unique_contacts_map:
+            unique_contacts_map[hashed_email] = {
+                'hashed_email': hashed_email,
+                'labels': set(data['labels']),
+            }
+        else:
+            # Merge the label sets if we see the same hashed email again
+            unique_contacts_map[hashed_email]['labels'].update(data['labels'])
+
+    # 5) Create new Contact objects once per unique hashed_email
+    created_count = 0
+    for entry in unique_contacts_map.values():
         contact = Contact.objects.create(
             linked_account=la,
             user=la.owner,
-            hashed_email=data['hashed_email']
+            hashed_email=entry['hashed_email']
         )
-        # data['labels'] is the subset of new_labels that match the person’s membership
-        if data['labels']:
-            contact.labels.set(data['labels'])
+        if entry['labels']:
+            contact.labels.set(entry['labels'])
         created_count += 1
 
     print(f"Successfully created {created_count} contacts.\n")
@@ -613,7 +627,6 @@ def handle_email(email_id, from_email, user, associated_email):
                 process_status = 'passed'
 
                 # Possibly remove your filter label if it was applied previously
-                # E.g. if you store the ID in settings.EG_LABEL_ID or la.label
                 if hasattr(settings, 'EG_LABEL_ID') and settings.EG_LABEL_ID:
                     remove_label_body = {
                         "addLabelIds": [],
@@ -638,7 +651,6 @@ def handle_email(email_id, from_email, user, associated_email):
                 else:
                     # If user wants to archive
                     if la.archive_emails:
-                        # If you track your filter label in settings.EG_LABEL_ID or la.label
                         filter_label_id = getattr(settings, 'EG_LABEL_ID', '')
                         update_label = {
                             "addLabelIds": [filter_label_id] if filter_label_id else [],
@@ -824,6 +836,8 @@ def create_or_update_linked_account(request, credentials, email):
             )
             django_rq.enqueue(watch_email, associated_email=email)
             return linked_account, True, credentials_dict, created_label, False
+
+
 def get_paypal_button(request):
     """
     Returns the PaymentButtonForm pre-initialized for a subscription.
