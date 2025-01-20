@@ -824,3 +824,24 @@ def create_or_update_linked_account(request, credentials, email):
             )
             django_rq.enqueue(watch_email, associated_email=email)
             return linked_account, True, credentials_dict, created_label, False
+def get_paypal_button(request):
+    """
+    Returns the PaymentButtonForm pre-initialized for a subscription.
+    """
+    paypal_dict = {
+        "cmd": "_xclick-subscriptions",
+        'business': settings.PAYPAL_RECEIVER_EMAIL,
+        "a3": 12.99,  # monthly price
+        "p3": 1,      # duration of each unit
+        "t3": 'M',    # 'M' for month
+        "src": "1",   # make payments recur
+        "sra": "1",   # reattempt payment on payment error
+        "no_note": "1",
+        'item_name': 'Emailgurus subscription',
+        'custom': request.user.id,     # pass user_id
+        'currency_code': 'USD',
+        'notify_url': request.build_absolute_uri(reverse_lazy('paypal-ipn')),
+        'return_url': request.build_absolute_uri(reverse_lazy('payment_done')),
+        'cancel_return': request.build_absolute_uri(reverse_lazy('payment_canceled')),
+    }
+    return PaymentButtonForm(initial=paypal_dict)
