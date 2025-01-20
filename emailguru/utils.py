@@ -145,6 +145,7 @@ def update_contacts(associated_email, selected_labels=None):
 
     # 1) Remove existing contacts -> also clears M2M rows in 'contacts_contact_labels'
     Contact.objects.filter(linked_account=la).delete()
+
     # 2) Remove existing labels
     Label.objects.filter(linked_account=la).delete()
 
@@ -173,22 +174,18 @@ def update_contacts(associated_email, selected_labels=None):
         selected_labels=new_labels
     )
 
-    # --- FIX: Deduplicate by hashed_email before creating ---
-    # Build a dict keyed by hashed_email, merging label sets for that email.
-    # contacts_data is a list of {'hashed_email': x, 'labels': [Label, ...]}
+    # Deduplicate by hashed_email to avoid unique constraint errors
     unique_contacts_map = {}
     for data in contacts_data:
-        hashed_email = data['hashed_email']
-        if hashed_email not in unique_contacts_map:
-            unique_contacts_map[hashed_email] = {
-                'hashed_email': hashed_email,
-                'labels': set(data['labels']),
+        h_email = data['hashed_email']
+        if h_email not in unique_contacts_map:
+            unique_contacts_map[h_email] = {
+                'hashed_email': h_email,
+                'labels': set(data['labels'])
             }
         else:
-            # Merge the label sets if we see the same hashed email again
-            unique_contacts_map[hashed_email]['labels'].update(data['labels'])
+            unique_contacts_map[h_email]['labels'].update(data['labels'])
 
-    # 5) Create new Contact objects once per unique hashed_email
     created_count = 0
     for entry in unique_contacts_map.values():
         contact = Contact.objects.create(
@@ -272,9 +269,6 @@ def get_contacts(credentials, linked_account, hashed=True, selected_labels=None)
             for group in groups_result.get('contactGroups', [])
         }
 
-        # Build a set of label names for quick membership check
-        selected_label_names = {lbl.name for lbl in selected_labels} if selected_labels else set()
-
         next_page_token = None
         while True:
             response = people_service.people().connections().list(
@@ -306,9 +300,12 @@ def get_contacts(credentials, linked_account, hashed=True, selected_labels=None)
                     hashed_email = sha256(raw_email.encode('utf-8')).hexdigest() if hashed else raw_email
 
                     # Filter only the selected labels that match the person’s membership
-                    matching_labels = [
-                        lbl for lbl in selected_labels if lbl.name in person_groups
-                    ] if selected_labels else []
+                    if selected_labels:
+                        matching_labels = [
+                            lbl for lbl in selected_labels if lbl.name in person_groups
+                        ]
+                    else:
+                        matching_labels = []
 
                     all_connections.append({
                         'hashed_email': hashed_email,
@@ -388,7 +385,7 @@ def schedule_chunk_emails(user, chunk_size=100):
     for la in linked_accounts:
         credentials = _build_credentials(la.credentials)
         try:
-            # get_contacts with second param=False => returns list of plain emails
+            # get_contacts(...) with linked_account=False => returns plain emails
             contacts = get_contacts(credentials, linked_account=False, hashed=False)
             other_contacts = get_other_contacts(credentials, hashed=False)
             all_contacts.update(contacts + other_contacts)
@@ -425,10 +422,7 @@ def send_email_chunk(email_chunk, user):
         for email in email_chunk:
             sender_name = user.full_name if user.full_name else user.email
             subject = f'{sender_name} is inviting you to try Emailgurus'
-            context = {
-                'name': sender_name,
-                'code': user.referral_code
-            }
+            context = {'name': sender_name, 'code': user.referral_code}
             html_content = render_to_string('emails/referral_email.html', context)
 
             msg = EmailMessage(subject, html_content, to=[email])
@@ -572,7 +566,7 @@ def handle_email(email_id, from_email, user, associated_email):
       - Else, if from a known contact or an existing thread => pass.
       - Otherwise => filter (archive or trash).
     
-    Logs the outcome in EmailDebugInfo and increments FilteredEmails accordingly.
+    We use la.label (the Gmail label ID) for adding/removing label(s).
     """
     la = LinkedAccounts.objects.get(associated_email=associated_email)
     encrypted_contact = sha256(from_email.encode('utf-8')).hexdigest()
@@ -607,15 +601,16 @@ def handle_email(email_id, from_email, user, associated_email):
         if la.mark_first_outsider and not prior_debug_exists:
             debug_info.append("First-time outsider. Labeling but not archiving.")
             process_status = 'outsider'
-
-            # If you have an outsider label in settings, add it here:
-            if hasattr(settings, 'EG_OUTSIDER_LABEL_ID') and settings.EG_OUTSIDER_LABEL_ID:
+            # Add la.label, but DO NOT remove INBOX
+            if la.label:
                 update_label = {
-                    "addLabelIds": [settings.EG_OUTSIDER_LABEL_ID],
+                    "addLabelIds": [la.label],
                     "removeLabelIds": []
                 }
                 try:
-                    service.users().messages().modify(userId='me', id=email_id, body=update_label).execute()
+                    service.users().messages().modify(
+                        userId='me', id=email_id, body=update_label
+                    ).execute()
                 except HttpError as e:
                     debug_info.append(f"Error labeling outsider: {e}")
 
@@ -626,46 +621,57 @@ def handle_email(email_id, from_email, user, associated_email):
                 debug_info.append("Sender in contact list or existing thread -> pass.")
                 process_status = 'passed'
 
-                # Possibly remove your filter label if it was applied previously
-                if hasattr(settings, 'EG_LABEL') and settings.EG_LABEL:
+                # Possibly remove la.label if it was previously applied
+                if la.label:
                     remove_label_body = {
                         "addLabelIds": [],
-                        "removeLabelIds": [settings.EG_LABEL]
+                        "removeLabelIds": [la.label]
                     }
                     try:
-                        service.users().messages().modify(userId='me', id=email_id, body=remove_label_body).execute()
+                        service.users().messages().modify(
+                            userId='me', id=email_id, body=remove_label_body
+                        ).execute()
                     except HttpError as e:
-                        debug_info.append(f"Error removing filter label: {e}")
+                        debug_info.append(f"Error removing label: {e}")
 
             else:
-                # (C) Not whitelisted or contact => filter (archive or trash)
+                # (C) Not whitelisted/contact => filter (archive or trash)
                 debug_info.append("Not whitelisted/contact -> filtering.")
                 process_status = 'filtered'
 
-                # Decide whether to trash or just archive
                 if la.trash_emails:
+                    # Move to trash
                     update_label = {
                         "addLabelIds": ["TRASH"],
                         "removeLabelIds": ["INBOX"]
                     }
                 else:
-                    # If user wants to archive
+                    # Archive or label
                     if la.archive_emails:
-                        filter_label_id = getattr(settings, 'EG_LABEL', '')
-                        update_label = {
-                            "addLabelIds": [filter_label_id] if filter_label_id else [],
-                            "removeLabelIds": ["INBOX"]
-                        }
+                        # add la.label, remove INBOX
+                        if la.label:
+                            update_label = {
+                                "addLabelIds": [la.label],
+                                "removeLabelIds": ["INBOX"]
+                            }
                     else:
-                        # Just label without removing INBOX
-                        filter_label_id = getattr(settings, 'EG_LABEL', '')
-                        update_label = {
-                            "addLabelIds": [filter_label_id] if filter_label_id else [],
-                            "removeLabelIds": []
-                        }
+                        # Just add la.label, keep INBOX
+                        if la.label:
+                            update_label = {
+                                "addLabelIds": [la.label],
+                                "removeLabelIds": []
+                            }
+                        else:
+                            # If no label, we do nothing special
+                            update_label = {
+                                "addLabelIds": [],
+                                "removeLabelIds": []
+                            }
 
                 try:
-                    service.users().messages().modify(userId='me', id=email_id, body=update_label).execute()
+                    service.users().messages().modify(
+                        userId='me', id=email_id, body=update_label
+                    ).execute()
                 except HttpError as e:
                     debug_info.append(f"Error filtering message: {e}")
 
@@ -738,8 +744,8 @@ def create_or_update_linked_account(request, credentials, email):
     Creates or updates a LinkedAccounts entry for the user's Gmail connection.
     Also creates/fetches a label used for archiving, then starts a watcher.
 
-    If you already handle label creation or store label IDs in settings, 
-    you can adjust that logic accordingly.
+    We read `settings.EG_LABEL` as the **label name** to create in Gmail. 
+    The returned ID is stored in `linked_account.label` for future `modify()` calls.
     """
     service = build('gmail', 'v1', credentials=credentials)
     new_label_body = {
@@ -764,8 +770,8 @@ def create_or_update_linked_account(request, credentials, email):
         labels = service.users().labels().list(userId='me').execute()
         created_label = ''
         for label in labels.get('labels', []):
+            # Attempt identification by name or color
             if label.get('color'):
-                # Attempt identification by name or color
                 if label['name'] == settings.EG_LABEL or \
                    label['color'].get('backgroundColor') == '#8e63ce':
                     created_label = label['id']
@@ -774,8 +780,6 @@ def create_or_update_linked_account(request, credentials, email):
     # Prepare dictionary for credentials
     credentials_dict = credentials_to_dict(credentials)
     domain = get_email_domain(email)
-
-    from django.core.exceptions import ObjectDoesNotExist
 
     # -----------------------------------------
     # Scenario A: We have a refresh token
@@ -795,7 +799,7 @@ def create_or_update_linked_account(request, credentials, email):
                 linked_account.whitelist_domains.append(domain)
             linked_account.save()
 
-        # In either case, set the "label" field so we store the label ID if desired
+        # Store the label ID in linked_account.label
         linked_account.label = created_label
         linked_account.save()
 
@@ -808,6 +812,7 @@ def create_or_update_linked_account(request, credentials, email):
     # (Potential "re-activation" or partial token)
     # -----------------------------------------
     else:
+        from django.core.exceptions import ObjectDoesNotExist
         try:
             # Attempt to fetch existing account
             linked_account = LinkedAccounts.objects.get(
@@ -820,7 +825,6 @@ def create_or_update_linked_account(request, credentials, email):
             linked_account.label = created_label
             linked_account.save()
 
-            # Start inbox watching
             django_rq.enqueue(watch_email, associated_email=email)
             return None, False, {}, '', True
 
