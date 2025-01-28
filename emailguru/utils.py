@@ -136,7 +136,7 @@ def update_contacts(associated_email, selected_labels=None):
     1) Delete all existing Contacts (M2M relationships removed automatically).
     2) Delete all existing Labels for the LinkedAccount.
     3) Create fresh Label objects for the selected labels (if any).
-    4) Retrieve & create new Contacts from People API, ensuring no duplicates.
+    4) Retrieve & create new Contacts from People API and Other Contacts, ensuring no duplicates.
     5) Attach contacts to any relevant label(s).
     6) Reschedule contact sync job for repeated updates.
     """
@@ -165,7 +165,7 @@ def update_contacts(associated_email, selected_labels=None):
     else:
         print("No labels selected, skipping label creation.")
 
-    # 4) Fetch contacts from Google People API
+    # 4) Fetch contacts from Google People API and Other Contacts
     credentials = _build_credentials(la.credentials)
     contacts_data = get_contacts(
         credentials=credentials,
@@ -173,10 +173,17 @@ def update_contacts(associated_email, selected_labels=None):
         hashed=True,
         selected_labels=new_labels
     )
+    
+    # Also fetch other contacts
+    other_contacts = get_other_contacts(credentials, hashed=True)
+    other_contacts_data = [{'hashed_email': email, 'labels': []} for email in other_contacts]
+    
+    # Combine both contact lists
+    all_contacts_data = contacts_data + other_contacts_data
 
     # Deduplicate by hashed_email to avoid unique constraint errors
     unique_contacts_map = {}
-    for data in contacts_data:
+    for data in all_contacts_data:
         h_email = data['hashed_email']
         if h_email not in unique_contacts_map:
             unique_contacts_map[h_email] = {
