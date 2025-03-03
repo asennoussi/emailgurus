@@ -1,16 +1,15 @@
 from django.contrib.auth import views as auth_views
-
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, RedirectView, UpdateView
 from django.contrib.auth import login
-
+from django.http import JsonResponse, HttpResponseRedirect
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib import messages
-from django.http import JsonResponse
+from django.shortcuts import redirect
 
 from .forms import LoginForm, PasswordResetForm, SignUpForm, token_generator, CustomUser, UserEditForm
-from django.shortcuts import redirect
+
 # Create your views here.
 
 
@@ -35,7 +34,10 @@ class PasswordResetView(auth_views.PasswordResetView):
     def form_valid(self, form):
         response = super().form_valid(form)
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'ok', 'message': "If the email address exists in our database, you'll receive password reset instructions shortly."}, status=200)
+            return JsonResponse({
+                'status': 'ok', 
+                'message': "If the email address exists in our database, you'll receive password reset instructions shortly."
+            }, status=200)
         else:
             return response
 
@@ -53,47 +55,44 @@ class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(
-            self.request, "Your password has been reset successfully, you can now login.")
+        messages.success(self.request, "Your password has been reset successfully, you can now login.")
         return response
 
 
 class SignUpView(CreateView):
     template_name = "accounts/sign-up.html"
     form_class = SignUpForm
-    success_url = reverse_lazy(
-        'onboarding', kwargs={'step_name': 'link-account'})
+    success_url = reverse_lazy('onboarding', kwargs={'step_name': 'link-account'})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Set the default value for the form field using the value stored in the cookies
+        # Set the default value for the referral_code field from cookies
         kwargs['initial'] = {
-            'referral_code': self.request.COOKIES.get('referral_code', '')}
+            'referral_code': self.request.COOKIES.get('referral_code', '')
+        }
         return kwargs
 
     def form_valid(self, form):
         form.instance.email = form.instance.email.lower()
-        to_return = super().form_valid(form)
-        user = form.save()
-        user.is_verified = False  # Turns the user email verification to False
-        user.save()
+        # Save the user once and assign to self.object
+        self.object = form.save()
+        self.object.is_verified = False  # Ensure email verification is marked false
+        self.object.save()
 
-        form.send_activation_email(self.request, user)
-        # When the user signs up check if the referral is there.
+        form.send_activation_email(self.request, self.object)
+        # If a referral code is provided, create the referral record
         if form.cleaned_data['referral_code']:
-            form.create_referral(form.cleaned_data['referral_code'], user)
-        login(self.request, self.object,
-              backend='accounts.backends.EmailBackend')
-        return to_return
+            form.create_referral(form.cleaned_data['referral_code'], self.object)
+        # Log in the user using our custom authentication backend
+        login(self.request, self.object, backend='accounts.backends.EmailBackend')
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class ActivateView(RedirectView):
-
     url = reverse_lazy('dashboard')
 
     # Custom get method
     def get(self, request, uidb64, token):
-
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = CustomUser.objects.get(pk=uid)
@@ -104,10 +103,12 @@ class ActivateView(RedirectView):
             user.is_verified = True
             user.save()
             messages.success(
-                request, 'Awesome! You successfully verified your email. Enjoy Emailgurus', extra_tags='text-center')
+                request, 'Awesome! You successfully verified your email. Enjoy Emailgurus', extra_tags='text-center'
+            )
         else:
             messages.error(
-                request, 'We could not verify your account. Please try again', extra_tags='alert alert-danger text-center')
+                request, 'We could not verify your account. Please try again', extra_tags='alert alert-danger text-center'
+            )
 
         return super().get(request, uidb64, token)
 
@@ -116,22 +117,18 @@ class CustomUserEditView(UpdateView):
     model = CustomUser
     form_class = UserEditForm
     template_name_suffix = '_update_form'
-    # Replace 'success_page_name' with the appropriate URL name
     success_url = reverse_lazy('settings')
 
     def get_object(self, queryset=None):
-        # Get the current user. Ensure that a user is logged in.
+        # Return the current logged in user
         if self.request.user.is_authenticated:
             return self.request.user
         else:
-            # Handle unauthenticated user (Maybe redirect to the login page)
             return redirect('home')
 
     def form_valid(self, form):
-        # Check if user is not subscribed and handle the subscription logic here
+        # Subscription logic can be added here if needed.
         if self.object.subscription_status not in ['subscribed']:
-            # Your subscription logic goes here. You might want to call an external API, charge the user, etc.
-            # self.object.subscription_status = 'subscribed'  # For now, just setting the status
             pass
         messages.success(self.request, "User details updated successfully!")
         return super().form_valid(form)
