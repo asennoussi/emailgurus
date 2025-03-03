@@ -151,6 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'accounts.CustomUser'  # new
 AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailBackend', 
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
     'axes.backends.AxesStandaloneBackend',
