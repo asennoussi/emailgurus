@@ -32,20 +32,20 @@
                         </div>
                         <div class="form-group">
                             {{ form.password1 }}
-                            <label class="label-control" for="{{ form.password1.id_for_label }}">Password </label>
+                            <label class="label-control" for="{{ form.password1.id_for_label }}">Password</label>
                             <div class="help-block with-errors">{{ form.password1.errors }}</div>
                         </div>
                         <div class="form-group">
                             {{ form.password2 }}
-                            <label class="label-control" for="{{ form.password2.id_for_label }}">Confirm
-                                Password</label>
+                            <label class="label-control" for="{{ form.password2.id_for_label }}">Confirm Password</label>
                             <div class="help-block with-errors">{{ form.password2.errors }}</div>
                         </div>
                         {{ form.referral_code }}
+                        {{ form.extra_info }}
                         <div class="form-group checkbox">
                             By signing up, I agree with Emailgurus's <a href="privacy-policy.html">Privacy Policy</a> and <a
                                 href="terms-conditions.html">Terms Conditions</a>
-                            <div class="help-block with-errors"></div>
+                            <div class="help-block with-errors">{{ form.non_field_errors }}</div>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="form-control-submit-button">SIGN UP</button>
@@ -56,22 +56,19 @@
                     </form>
                 </div> <!-- end of form container -->
                 <!-- end of sign up form -->
-
             </div> <!-- end of col -->
         </div> <!-- end of row -->
     </div> <!-- end of container -->
 </header> <!-- end of ex-header -->
 <!-- end of header -->
 
-
 <!-- Scripts -->
-<script src="{% static 'homepage/js/jquery.min.js' %}"></script> <!-- jQuery for Bootstrap's JavaScript plugins -->
-<script src="{% static 'homepage/js/popper.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
-<script src="{% static 'homepage/js/bootstrap.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
-<script src="{% static 'homepage/js/jquery.easing.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
-<script src="{% static 'homepage/js/swiper.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/jquery.min.js' %}"></script>
+<script src="{% static 'homepage/js/popper.min.js' %}"></script>
+<script src="{% static 'homepage/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'homepage/js/jquery.easing.min.js' %}"></script>
+<script src="{% static 'homepage/js/swiper.min.js' %}"></script>
 <script src="{% static 'homepage/js/jquery.magnific-popup.js' %}"></script>
-<!-- Popper tooltip library for Bootstrap -->
-<script src="{% static 'homepage/js/validator.min.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
-<script src="{% static 'homepage/js/scripts.js' %}"></script> <!-- Popper tooltip library for Bootstrap -->
+<script src="{% static 'homepage/js/validator.min.js' %}"></script>
+<script src="{% static 'homepage/js/scripts.js' %}"></script>
 {% endblock %}
