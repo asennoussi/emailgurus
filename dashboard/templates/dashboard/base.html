@@ -14,9 +14,10 @@
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'dashboard/images/favicon/favicon-32x32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'dashboard/images/favicon/favicon-16x16.png' %}">
   <link rel="icon" type="image/x-icon" href="{% static 'dashboard/images/favicon/favicon.ico' %}">
-  
+
   <!-- Sweet Alert -->
-  {% comment %} <link type="text/css" href="{% static 'dashboard/css/sweetalert2.min.css' %}" rel="stylesheet"> {% endcomment %}
+  {% comment %}
+  <link type="text/css" href="{% static 'dashboard/css/sweetalert2.min.css' %}" rel="stylesheet"> {% endcomment %}
 
   <!-- Notyf 
 <link type="text/css" href="../../vendor/notyf/notyf.min.css" rel="stylesheet">
@@ -30,15 +31,15 @@
 </head>
 
 <body>
+  {# Centralized GTM include #}
+  {% include "partials/gtm.html" %}
 
   <!-- NOTICE: You can use the _analytics.html partial to include production code specific code & trackers -->
 
-
-
   <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
     <a class="navbar-brand me-lg-5" href="{% url 'dashboard' %}">
-      <img class="navbar-brand-dark" src="{% static 'homepage/images/white.svg' %}" alt="Emailgurus logo" /> <img
-        class="navbar-brand-light" src="{% static 'homepage/images/white.svg' %}" alt="Emailgurus logo" />
+      <img class="navbar-brand-dark" src="{% static 'homepage/images/white.svg' %}" alt="Emailgurus logo" />
+      <img class="navbar-brand-light" src="{% static 'homepage/images/white.svg' %}" alt="Emailgurus logo" />
     </a>
     <div class="d-flex align-items-center">
       <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse"
@@ -54,8 +55,7 @@
         <div class="d-flex align-items-center">
           <div class="d-block">
             <h2 class="mb-2 font-small">{{ request.user.email }}</h2>
-            <a href="{%url 'logout'%}"
-              class="btn btn-secondary btn-sm d-inline-flex align-items-center">
+            <a href="{% url 'logout' %}" class="btn btn-secondary btn-sm d-inline-flex align-items-center">
               <svg class="icon icon-xxs me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -82,13 +82,12 @@
             <span class="sidebar-icon">
               <img src="{% static 'homepage/images/white.svg' %}" alt="Emailgurus">
             </span>
-            {%if request.user.subscription_status ==  'trial' %}
-              <span class="badge badge-sm bg-secondary ms-1 text-gray-800">Trial</span>
-              {% endif %}
-
+            {% if request.user.subscription_status == 'trial' %}
+            <span class="badge badge-sm bg-secondary ms-1 text-gray-800">Trial</span>
+            {% endif %}
           </a>
         </li>
-        <li class="nav-item {% if request.resolver_match.url_name == "dashboard" %}active{% endif %}">
+        <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
           <a href="{% url 'dashboard' %}" class="nav-link">
             <span class="sidebar-icon">
               <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -96,11 +95,10 @@
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
               </svg>
             </span>
-            <span class="sidebar-text">Dashboard 
+            <span class="sidebar-text">Dashboard</span>
           </a>
         </li>
-
-        <li class="nav-item {% if request.resolver_match.url_name == "linked_accounts" %}active{% endif %} ">
+        <li class="nav-item {% if request.resolver_match.url_name == 'linked_accounts' %}active{% endif %}">
           <a href="{% url 'linked_accounts' %}" class="nav-link">
             <span class="sidebar-icon">
               <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -112,43 +110,50 @@
             <span class="sidebar-text">Linked accounts</span>
           </a>
         </li>
-        <li class="nav-item {% if request.resolver_match.url_name == "user_referrals" %}active{% endif %} ">
+        <li class="nav-item {% if request.resolver_match.url_name == 'user_referrals' %}active{% endif %}">
           <a href="{% url 'user_referrals' %}" class="nav-link">
             <span class="sidebar-icon">
-              <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33" />
               </svg>
             </span>
             <span class="sidebar-text">Referrals</span>
           </a>
         </li>
-
-        <li class="nav-item {% if request.resolver_match.url_name == "settings" %}active{% endif %} ">
+        <li class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
           <a href="{% url 'settings' %}" class="nav-link">
             <span class="sidebar-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Circle representing the head of the person -->
-                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
-                <!-- Semi-circle or U shape representing the shoulders and torso -->
-                <path d="M4 20C4 15 12 15 12 20C12 20 20 20 20 20C20 15 12 10 12 15C12 10 4 15 4 20Z" stroke="currentColor" stroke-width="2" fill="none"/>
-            </svg>
-            
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" fill="none" />
+                <path d="M4 20C4 15 12 15 12 20C12 20 20 20 20 20C20 15 12 10 12 15C12 10 4 15 4 20Z"
+                  stroke="currentColor" stroke-width="2" fill="none" />
+              </svg>
             </span>
             <span class="sidebar-text">Settings</span>
           </a>
         </li>
-
         <li class="nav-item {% if request.resolver_match.url_name == 'email_debugger' %}active{% endif %}">
           <a href="{% url 'email_debugger' %}" class="nav-link">
             <span class="sidebar-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" > <path d="M10 11C10 10.4477 10.4477 10 11 10H13C13.5523 10 14 10.4477 14 11C14 11.5523 13.5523 12 13 12H11C10.4477 12 10 11.5523 10 11Z" fill="currentColor" /> <path d="M11 14C10.4477 14 10 14.4477 10 15C10 15.5523 10.4477 16 11 16H13C13.5523 16 14 15.5523 14 15C14 14.4477 13.5523 14 13 14H11Z" fill="currentColor" /> <path fill-rule="evenodd" clip-rule="evenodd" d="M9.09447 4.74918C8.41606 4.03243 8 3.0648 8 2H10C10 3.10457 10.8954 4 12 4C13.1046 4 14 3.10457 14 2H16C16 3.0648 15.5839 4.03243 14.9055 4.74918C16.1782 5.45491 17.1673 6.6099 17.6586 8H19C19.5523 8 20 8.44772 20 9C20 9.55229 19.5523 10 19 10H18V12H19C19.5523 12 20 12.4477 20 13C20 13.5523 19.5523 14 19 14H18V16H19C19.5523 16 20 16.4477 20 17C20 17.5523 19.5523 18 19 18H17.6586C16.8349 20.3304 14.6124 22 12 22C9.38756 22 7.16508 20.3304 6.34141 18H5C4.44772 18 4 17.5523 4 17C4 16.4477 4.44772 16 5 16H6V14H5C4.44772 14 4 13.5523 4 13C4 12.4477 4.44772 12 5 12H6V10H5C4.44772 10 4 9.55229 4 9C4 8.44772 4.44772 8 5 8H6.34141C6.83274 6.6099 7.82181 5.45491 9.09447 4.74918ZM8 16V10C8 7.79086 9.79086 6 12 6C14.2091 6 16 7.79086 16 10V16C16 18.2091 14.2091 20 12 20C9.79086 20 8 18.2091 8 16Z" fill="currentColor" /> </svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M10 11C10 10.4477 10.4477 10 11 10H13C13.5523 10 14 10.4477 14 11C14 11.5523 13.5523 12 13 12H11C10.4477 12 10 11.5523 10 11Z"
+                  fill="currentColor" />
+                <path
+                  d="M11 14C10.4477 14 10 14.4477 10 15C10 15.5523 10.4477 16 11 16H13C13.5523 16 14 15.5523 14 15C14 14.4477 13.5523 14 13 14H11Z"
+                  fill="currentColor" />
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M9.09447 4.74918C8.41606 4.03243 8 3.0648 8 2H10C10 3.10457 10.8954 4 12 4C13.1046 4 14 3.10457 14 2H16C16 3.0648 15.5839 4.03243 14.9055 4.74918C16.1782 5.45491 17.1673 6.6099 17.6586 8H19C19.5523 8 20 8.44772 20 9C20 9.55229 19.5523 10 19 10H18V12H19C19.5523 12 20 12.4477 20 13C20 13.5523 19.5523 14 19 14H18V16H19C19.5523 16 20 16.4477 20 17C20 17.5523 19.5523 18 19 18H17.6586C16.8349 20.3304 14.6124 22 12 22C9.38756 22 7.16508 20.3304 6.34141 18H5C4.44772 18 4 17.5523 4 17C4 16.4477 4.44772 16 5 16H6V14H5C4.44772 14 4 13.5523 4 13C4 12.4477 4.44772 12 5 12H6V10H5C4.44772 10 4 9.55229 4 9C4 8.44772 4.44772 8 5 8H6.34141C6.83274 6.6099 7.82181 5.45491 9.09447 4.74918ZM8 16V10C8 7.79086 9.79086 6 12 6C14.2091 6 16 7.79086 16 10V16C16 18.2091 14.2091 20 12 20C9.79086 20 8 18.2091 8 16Z"
+                  fill="currentColor" />
+              </svg>
             </span>
             <span class="sidebar-text">Email Debugger</span>
           </a>
         </li>
         <li role="separator" class="dropdown-divider mt-4 mb-3 border-gray-700"></li>
         {% block upgradable %}{% endblock %}
-
       </ul>
     </div>
   </nav>
@@ -159,18 +164,7 @@
       <div class="container-fluid px-0">
         <div class="d-flex justify-content-between w-100" id="navbarSupportedContent">
           <div class="d-flex align-items-center">
-            <!-- Search form -->
-            <!-- <form class="navbar-search form-inline" id="navbar-search-main">
-          <div class="input-group input-group-merge search-bar">
-              <span class="input-group-text" id="topbar-addon">
-                <svg class="icon icon-xs" x-description="Heroicon name: solid/search" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                </svg>
-              </span>
-              <input type="text" class="form-control" id="topbarInputIconLeft" placeholder="Search" aria-label="Search" aria-describedby="topbar-addon">
-          </div>
-        </form> -->
-            <!-- / Search form -->
+            {# Search form removed for brevity #}
           </div>
           <!-- Navbar links -->
           <ul class="navbar-nav align-items-center">
@@ -184,15 +178,6 @@
                 </div>
               </a>
               <div class="dropdown-menu dashboard-dropdown dropdown-menu-end mt-2 py-1">
-                {% comment %} <a class="dropdown-item d-flex align-items-center" href="#">
-                  <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-                      clip-rule="evenodd"></path>
-                  </svg>
-                  My Profile
-                </a> {% endcomment %}
                 <a class="dropdown-item d-flex align-items-center" href="{% url 'settings' %}">
                   <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg">
@@ -202,26 +187,7 @@
                   </svg>
                   Settings
                 </a>
-                {% comment %} <a class="dropdown-item d-flex align-items-center" href="#">
-                  <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd"
-                      d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v7h-2l-1 2H8l-1-2H5V5z"
-                      clip-rule="evenodd"></path>
-                  </svg>
-                  Messages
-                </a> {% endcomment %}
-                <a class="dropdown-item d-flex align-items-center" target="_blank" href="mailto:support@emailgurus.xyz">
-                  <svg class="dropdown-icon text-gray-400 me-2" fill="currentColor" viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C15.802 8.249 16 9.1 16 10zm-5.165 3.913l1.58 1.58A5.98 5.98 0 0110 16a5.976 5.976 0 01-2.516-.552l1.562-1.562a4.006 4.006 0 001.789.027zm-4.677-2.796a4.002 4.002 0 01-.041-2.08l-.08.08-1.53-1.533A5.98 5.98 0 004 10c0 .954.223 1.856.619 2.657l1.54-1.54zm1.088-6.45A5.974 5.974 0 0110 4c.954 0 1.856.223 2.657.619l-1.54 1.54a4.002 4.002 0 00-2.346.033L7.246 4.668zM12 10a2 2 0 11-4 0 2 2 0 014 0z"
-                      clip-rule="evenodd"></path>
-                  </svg>
-                  Support
-                </a>
-                <div role="separator" class="dropdown-divider my-1"></div>
-                <a class="dropdown-item d-flex align-items-center" href="{%url 'logout'%}">
+                <a class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}">
                   <svg class="dropdown-icon text-danger me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -236,25 +202,31 @@
         </div>
       </div>
     </nav>
-    {% if not user.is_verified%}
-      <ul class="messages">  
-        <li class=" text-center fw-bolder alert alert-warning">Please check your email and verify your account.</li>
-      </ul>
+    {% if not user.is_verified %}
+    <ul class="messages">
+      <li class="text-center fw-bolder alert alert-warning">
+        Please check your email and verify your account.
+      </li>
+    </ul>
     {% endif %}
     {% if messages %}
     <ul class="messages">
       {% for message in messages %}
-      <li{% if message.tags %} class="alert alert-{{ message.tags }}" {% endif %}>{{ message }}</li>
-        {% endfor %}
+      <li {% if message.tags %}class="alert alert-{{ message.tags }}" {% endif %}>
+        {{ message }}
+      </li>
+      {% endfor %}
     </ul>
     {% endif %}
     {% block content %}{% endblock %}
   </main>
+
+  {# Block for additional GTM dataLayer pushes from child templates #}
+  {% block gtm_push %}{% endblock %}
+
   <script src="{% static 'dashboard/js/@popperjs/core/dist/umd/popper.min.js' %}" deferred></script>
   <script src="{% static 'dashboard/js/bootstrap/dist/js/bootstrap.min.js' %}" deferred></script>
-
   {% block extra_js %}{% endblock %}
-
 
 </body>
 

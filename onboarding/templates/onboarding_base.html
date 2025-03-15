@@ -1,39 +1,45 @@
 {% load static %}
-<html>
-    <title>{% block title %}EG:Let's get started - Link account{% endblock %}  </title>
-    <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-            <meta name="description" content="Onboarding to Emailgurus">
-            <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap&subset=latin-ext" rel="stylesheet">
-            <link href="{% static 'onboarding/css/onboarding.css' %}" rel="stylesheet">
-            <!-- Favicon -->
-            <link rel="apple-touch-icon" sizes="120x120" href="{% static 'dashboard/images/favicon/apple-touch-icon.png' %}">
-            <link rel="icon" type="image/png" sizes="32x32" href="{% static 'dashboard/images/favicon/favicon-32x32.png' %}">
-            <link rel="icon" type="image/png" sizes="16x16" href="{% static 'dashboard/images/favicon/favicon-16x16.png' %}">
-            <link rel="icon" type="image/x-icon" href="{% static 'dashboard/images/favicon/favicon.ico' %}">
-    </head>
-    <body>
-        <header>
-            <img class="logo-header" src="{% static 'homepage/images/purple.svg' %}" alt='Emailgurus -- Flag unknow senders'/>
-        </header>
-        <div class="row ">
-            <div class="col-8 col-xs-12 card">
-                <div class="container-header">
-                    <div class="step-number">STEP <strong>{{step_number}}</strong> OF <strong>4</strong></div>
-                    {% if step_number > 1%}
-                    <div class="skip">
-                        <a href="{% url 'dashboard'%}">
-                            Skip
-                        </a>
-                    </div>
-                    {%endif%}
-                  </div>
-                  
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Onboarding - Emailgurus{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'onboarding/css/onboarding.css' %}">
+    <!-- Favicon (reusing dashboard icons) -->
+    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'dashboard/images/favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'dashboard/images/favicon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'dashboard/images/favicon/favicon-16x16.png' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'dashboard/images/favicon/favicon.ico' %}">
+</head>
 
-                {% block main %}{% endblock %}
+<body>
+    {% include "partials/gtm.html" %}
+
+    <header>
+        <img class="logo-header" src="{% static 'homepage/images/purple.svg' %}" alt="Emailgurus" />
+        <h1>Emailgurus Onboarding</h1>
+    </header>
+
+    <div class="row">
+        <div class="col-8 col-xs-12 card">
+            <div class="container-header">
+                <div class="step-number">STEP <strong>{{ step_number }}</strong> OF <strong>4</strong></div>
+                {% if step_number > 1 %}
+                <div class="skip">
+                    <a href="{% url 'dashboard' %}">Skip</a>
+                </div>
+                {% endif %}
             </div>
+            {% block main %}{% endblock %}
         </div>
-        {% block extra_js %}{% endblock %}
-    </body>
-    <html>
+    </div>
+
+    {# This block is for page-specific GTM pushes #}
+    {% block gtm_push %}{% endblock %}
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

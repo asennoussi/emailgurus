@@ -3,37 +3,47 @@
 {% block title %}EG:Let's get started - Link account{% endblock %}
 {% block main %}
 <div class="col-12 text-center">
-                    <h3>{{request.user.count_contact}} <i>Contacts from</i> {{account.associated_email}}  </h3>
-                </div>
+    <h3>{{request.user.count_contact}} <i>Contacts from</i> {{account.associated_email}} </h3>
+</div>
 
-                <div class="col-12">
-                    <p> By default:<p> 
-                    <p> ✅ Any email coming from your contacts will appear on your inbox or follow Gmail inbox logic.</p>
-                    <p> ✚ Add people you know to your contact list so they don't get Filtered by Emailgurus.</p>
-                    <p> But you can customize the behavior..<p> 
-                </div>
-                <h2 class="text-center">What to do with unknown senders?</h2>
-                <h4 class="text-center">Please select one option</h4>
-                <div class="row text-center">
-                    <div class="col-6"></div>
-                    <div class="col-6"></div>
-                </div>
-                <form action="" method="post">
-                    {% csrf_token %}
-                    {{form.whitelist_domains}}
-                <div class="col-12">
-                    <div class="col-12">
-                        {{ form.archive_emails.0 }}
-                    </div>
-                    <div class="col-12">
-                        {{ form.archive_emails.1 }}
-                    </div>
-                </div>
-                <div class="header">
-                    
-                    <div>
-                        <input type="submit" class="submit-button text-center" value="➡️ Domains Allow-list"/>
-                    </div>
-                </div>
-            </form>
+<div class="col-12">
+    <p> By default:
+    <p>
+    <p> ✅ Any email coming from your contacts will appear on your inbox or follow Gmail inbox logic.</p>
+    <p> ✚ Add people you know to your contact list so they don't get Filtered by Emailgurus.</p>
+    <p> But you can customize the behavior..
+    <p>
+</div>
+<h2 class="text-center">What to do with unknown senders?</h2>
+<h4 class="text-center">Please select one option</h4>
+<div class="row text-center">
+    <div class="col-6"></div>
+    <div class="col-6"></div>
+</div>
+<form action="" method="post">
+    {% csrf_token %}
+    {{form.whitelist_domains}}
+    <div class="col-12">
+        <div class="col-12">
+            {{ form.archive_emails.0 }}
+        </div>
+        <div class="col-12">
+            {{ form.archive_emails.1 }}
+        </div>
+    </div>
+    <div class="header">
+
+        <div>
+            <input type="submit" class="submit-button text-center" value="➡️ Domains Allow-list" />
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block gtm_push %}
+<script>
+    window.dataLayer = window.dataLayer || []
+    dataLayer.push({
+        'event': 'linkedAccount'
+    });
+</script>
 {% endblock %}

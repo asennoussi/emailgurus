@@ -119,19 +119,8 @@
         {% block content %}{% endblock %}
     </div>
 
-<!-- Google Tag Manager -->
-<script>
-    var gtm_container = '{% settings_value "GTM_CONTAINER_ID" %}';
-    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer',gtm_container);</script>
-<!-- End Google Tag Manager -->
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={% settings_value "GTM_CONTAINER_ID" %}"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-    {% block additional_js %}
+{% include "partials/gtm.html" %}
+{% block additional_js %}
 {% endblock additional_js %}
 </body>
 
