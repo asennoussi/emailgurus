@@ -99,7 +99,10 @@ ROOT_URLCONF = 'emailguru.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / "templates",
+            Path(__file__).resolve().parent / "templates"
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -255,6 +258,8 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'  # Force HTTPS for auth callbacks
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
+
+ACCOUNT_SIGNUP_REDIRECT_URL = '/onboarding/link-account/'
 
 try:
     from .local_settings import *
